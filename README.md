@@ -25,8 +25,9 @@ Now an installable iPhone web app (PWA): dark neon-red matrix theme, swipeable F
 index.html             the whole app (no dependencies)
 manifest.webmanifest   PWA manifest
 sw.js                  service worker (offline app shell; never caches API calls)
-icon.svg               app mark (three braided threads, spindle, shears)
-icons/                 192/512 PNGs, maskable 192/512, apple-touch-icon 180, favicon
+icon.svg               default app mark (Neon Cauldron)
+icons/<variant>/       per-icon SVGs + 192/512 PNGs, maskable 192/512, apple-touch-icon 180, favicon
+                       variants: neon-cauldron (default), thread-weavers, arcane, classic
 fonts/                 Share Tech Mono (SIL OFL, self-hosted for offline)
 shots/                 iPhone screenshots (393x852 @3x)
 ```
@@ -34,6 +35,8 @@ shots/                 iPhone screenshots (393x852 @3x)
 ## Install on iPhone
 
 Host the folder on a same-origin HTTPS host (GitHub Pages works: Settings → Pages → deploy from branch). Open the URL in Safari → Share → **Add to Home Screen**.
+
+**App icon:** pick Neon Cauldron, Thread Weavers, Arcane, or Classic under Settings → App icon *before* tapping Add to Home Screen. iPhone captures the icon at install time; to change it later, remove the app from the home screen and add it again. (Preview: `shots/icons-preview.png`.)
 
 > Service workers require same-origin hosting. GitHub Pages works; serving through the jsDelivr CDN renders the page but the service worker/offline install will not register properly there.
 

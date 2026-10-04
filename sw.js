@@ -1,11 +1,13 @@
 /* Moirai service worker: caches the app shell for offline use.
    Never caches API calls (POSTs to OpenAI/Anthropic/xAI pass straight through). */
-const VERSION = "moirai-v2";
+const VERSION = "moirai-v3";
+const ICON_VARIANTS = ["neon-cauldron", "thread-weavers", "arcane", "classic"];
+const ICON_FILES = ["icon.svg", "icon-192.png", "icon-512.png", "icon-maskable-192.png",
+  "icon-maskable-512.png", "apple-touch-icon.png", "favicon-32.png"];
 const SHELL = [
   "./", "index.html", "manifest.webmanifest", "icon.svg",
-  "icons/icon-192.png", "icons/icon-512.png", "icons/icon-maskable-192.png",
-  "icons/icon-maskable-512.png", "icons/apple-touch-icon.png", "icons/favicon-32.png",
-  "fonts/ShareTechMono-Regular.woff2"
+  "fonts/ShareTechMono-Regular.woff2",
+  ...ICON_VARIANTS.flatMap(v => ICON_FILES.map(f => `icons/${v}/${f}`))
 ];
 
 self.addEventListener("install", e => {
