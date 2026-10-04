@@ -1,6 +1,6 @@
 /* Moirai service worker: caches the app shell for offline use.
    Never caches API calls (POSTs to OpenAI/Anthropic/xAI pass straight through). */
-const VERSION = "moirai-v3";
+const VERSION = "moirai-v4";
 const ICON_VARIANTS = ["neon-cauldron", "thread-weavers", "arcane", "classic"];
 const ICON_FILES = ["icon.svg", "icon-192.png", "icon-512.png", "icon-maskable-192.png",
   "icon-maskable-512.png", "apple-touch-icon.png", "favicon-32.png"];
