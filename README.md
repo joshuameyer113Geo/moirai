@@ -6,10 +6,8 @@ One question to ChatGPT, Claude, and Grok, then the thread they share.
 - Lachesis measures: Claude
 - Atropos cuts: Grok
 
-Open `index.html`. Keys stay in the browser. If a call is blocked, paste that reply and weave.
+Open index.html. Listen fills the question from the microphone. Speak thread reads the woven reply aloud. Each panel can also be spoken. Stop ends both.
 
-The page can copy the thread, download a Markdown note, and keep the last twelve threads in this browser.
+Listening needs a browser that supports speech recognition, and permission for the microphone. On iPhone, open the page in Safari.
 
-Agreement is the safer core. A point only one model makes is a lead to check, not a fact.
-
-To publish: Settings, Pages, deploy from branch `main`, folder `/` (root).
+Keys stay in the browser. Agreement is the safer core.

@@ -5,196 +5,73 @@
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Moirai</title>
 <link rel="icon" href="icon.svg" type="image/svg+xml" />
-<meta name="description" content="Moirai asks ChatGPT, Claude, and Grok, then shows the thread they share." />
 <meta name="theme-color" content="#f4f0e8" />
 <style>
-  :root { --bg:#f4f0e8; --panel:#fffcf7; --line:#e3dccf; --text:#1d1a16; --muted:#6f675c; --accent:#1e3f73; --gold:#8a7344; --ink:#243024; }
+  :root { --bg:#f4f0e8; --panel:#fffcf7; --line:#e3dccf; --text:#1d1a16; --muted:#6f675c; --accent:#1e3f73; --gold:#8a7344; }
   * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 "Iowan Old Style", Palatino, Georgia, serif; }
-  button, input, textarea { font: 14px/1.4 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Georgia, serif; }
+  button, input, textarea { font: 14px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; }
   header, main { max-width: 980px; margin: 0 auto; }
   header { padding: 22px 16px 6px; display: flex; gap: 14px; align-items: center; }
-  .mark { width: 52px; height: 52px; flex: none; }
-  h1 { font-size: 28px; margin: 0; font-weight: 560; letter-spacing: .01em; }
-  .lead { margin: 2px 0 0; color: var(--muted); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .key { height: 14px; margin: 4px 16px 12px; background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='28' height='14' viewBox='0 0 28 14'><path d='M0 7h6M8 2v10M14 2v10M20 2v10M22 7h6M8 2h6M14 12h6' fill='none' stroke='%238a7344' stroke-width='1.2'/></svg>"); opacity: .7; }
+  h1 { margin: 0; font-size: 28px; }
+  .lead, .note { color: var(--muted); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
   main { padding: 0 16px 56px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 0 rgba(255,255,255,.8) inset; }
-  label { display: block; color: var(--muted); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; margin: 8px 0 4px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
   textarea, input { width: 100%; background: #faf7f1; color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; }
-  textarea { min-height: 96px; resize: vertical; }
+  textarea { min-height: 96px; }
   .row, .chips { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
   button, .chip { border: 1px solid var(--line); background: #fff; color: var(--text); border-radius: 999px; padding: 8px 13px; }
   button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .chip { color: var(--muted); font-size: 12px; }
-  .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  .grid { display: grid; gap: 10px; }
   @media (min-width: 840px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
-  .panel { border-top: 3px solid var(--gold); }
-  .panel.measure { border-top-color: #6e7f62; }
-  .panel.cut { border-top-color: #1e3f73; }
-  .head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
-  .kicker { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .measure .kicker { color: #4d6248; }
-  .cut .kicker { color: var(--accent); }
-  .count, .note, .err { color: var(--muted); font-size: 12px; font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
-  .err { color: #8d3b32; min-height: 16px; }
-  .out { white-space: pre-wrap; font-size: 15px; min-height: 72px; }
-  details summary { cursor: pointer; color: var(--muted); font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; font-size: 13px; }
-  .hist button { text-align: left; border-radius: 12px; width: 100%; margin-top: 8px; }
+  .kicker { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+  .out { white-space: pre-wrap; min-height: 72px; }
+  .err { color: #8d3b32; font-size: 12px; }
+  .head { display: flex; justify-content: space-between; }
 </style>
 </head>
 <body>
-<header>
-  <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
-    <rect width="64" height="64" rx="14" fill="#f7f4ee" stroke="#c8b48a"/>
-    <path d="M8 8h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5zM8 51h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5zm9 0h5v5h-5z" fill="#c8b48a"/>
-    <circle cx="20" cy="20" r="3" fill="none" stroke="#8a7344" stroke-width="1.6"/>
-    <path d="M18 46c2-12 8-16 8-24M32 16v30M43 23l7 9-7 9M50 32H40" fill="none" stroke="#8a7344" stroke-width="1.6" stroke-linecap="round"/>
-  </svg>
-  <div>
-    <h1>Moirai</h1>
-    <p class="lead">Three replies. One thread. ChatGPT spins, Claude measures, Grok cuts.</p>
-  </div>
-</header>
-<div class="key"></div>
+<header><div><h1>Moirai</h1><p class="lead">Listen, ask, then hear the thread.</p></div></header>
 <main>
   <section class="card">
-    <label for="q">Question</label>
     <textarea id="q" placeholder="Ask one clear question."></textarea>
-    <div class="chips" id="chips"></div>
     <div class="row">
       <button class="primary" id="ask">Ask all three</button>
+      <button id="listen">Listen</button>
+      <button id="speak">Speak thread</button>
+      <button id="stopVoice">Stop</button>
       <button id="combine">Weave the thread</button>
-      <button id="copy">Copy thread</button>
-      <button id="save">Download</button>
     </div>
-    <p class="note">Keys stay in this browser. If a call is blocked, paste that reply and weave. Enter asks; Shift+Enter adds a line.</p>
+    <p class="note">Allow the microphone when asked. On iPhone, open this page in Safari.</p>
     <details>
-      <summary>Keys and model ids</summary>
-      <label>OpenAI key</label><input id="openaiKey" type="password" placeholder="sk-..." />
-      <label>OpenAI model</label><input id="openaiModel" value="gpt-4.1" />
-      <label>Anthropic key</label><input id="anthropicKey" type="password" placeholder="sk-ant-..." />
-      <label>Claude model</label><input id="claudeModel" value="claude-sonnet-4-6" />
-      <label>xAI key</label><input id="xaiKey" type="password" placeholder="xai-..." />
-      <label>Grok model</label><input id="grokModel" value="grok-4" />
+      <summary>Keys</summary>
+      <input id="openaiKey" type="password" placeholder="OpenAI key" />
+      <input id="openaiModel" value="gpt-4.1" />
+      <input id="anthropicKey" type="password" placeholder="Anthropic key" />
+      <input id="claudeModel" value="claude-sonnet-4-6" />
+      <input id="xaiKey" type="password" placeholder="xAI key" />
+      <input id="grokModel" value="grok-4" />
     </details>
   </section>
   <section class="grid">
-    <article class="card panel">
-      <div class="head"><div class="kicker">Clotho · ChatGPT</div><span class="count" id="gptCount"></span></div>
-      <textarea id="gpt" placeholder="Reply, or paste one."></textarea><div class="err" id="gptErr"></div>
-    </article>
-    <article class="card panel measure">
-      <div class="head"><div class="kicker">Lachesis · Claude</div><span class="count" id="claudeCount"></span></div>
-      <textarea id="claude" placeholder="Reply, or paste one."></textarea><div class="err" id="claudeErr"></div>
-    </article>
-    <article class="card panel cut">
-      <div class="head"><div class="kicker">Atropos · Grok</div><span class="count" id="grokCount"></span></div>
-      <textarea id="grok" placeholder="Reply, or paste one."></textarea><div class="err" id="grokErr"></div>
-    </article>
+    <article class="card"><div class="head"><div class="kicker">Clotho</div><button data-speak="gpt">Speak</button></div><textarea id="gpt"></textarea><div class="err" id="gptErr"></div></article>
+    <article class="card"><div class="head"><div class="kicker">Lachesis</div><button data-speak="claude">Speak</button></div><textarea id="claude"></textarea><div class="err" id="claudeErr"></div></article>
+    <article class="card"><div class="head"><div class="kicker">Atropos</div><button data-speak="grok">Speak</button></div><textarea id="grok"></textarea><div class="err" id="grokErr"></div></article>
   </section>
-  <section class="card">
-    <div class="kicker">The thread</div>
-    <div class="out" id="synthesis">Ask, or paste at least two replies, then weave.</div>
-  </section>
-  <section class="card hist">
-    <div class="kicker">Kept threads</div>
-    <div id="history"></div>
-  </section>
+  <section class="card"><div class="kicker">The thread</div><div class="out" id="synthesis">Ask, or paste two replies, then weave.</div></section>
 </main>
 <script>
-const KEY = "moirai-keys";
-const HIST = "moirai-history";
-const fields = ["openaiKey","openaiModel","anthropicKey","claudeModel","xaiKey","grokModel"];
-const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
-fields.forEach(id => { if (saved[id]) document.getElementById(id).value = saved[id]; });
-fields.forEach(id => document.getElementById(id).addEventListener("change", () => {
-  const data = {}; fields.forEach(k => data[k] = document.getElementById(k).value.trim());
-  localStorage.setItem(KEY, JSON.stringify(data));
-}));
-const prompts = ["Compare two options and name the tradeoff.", "Rewrite this so a careful reader would trust it.", "Find the weak claim in this plan."];
-document.getElementById("chips").innerHTML = prompts.map(p => `<button class="chip" type="button">${p}</button>`).join("");
-document.getElementById("chips").onclick = (e) => { if (e.target.tagName === "BUTTON") document.getElementById("q").value = e.target.textContent; };
-["gpt","claude","grok"].forEach(id => document.getElementById(id).addEventListener("input", () => count(id)));
-function count(id) {
-  const n = document.getElementById(id).value.trim().split(/\s+/).filter(Boolean).length;
-  document.getElementById(id + "Count").textContent = n ? n + " words" : "";
-}
-function sentences(text) { return (text || "").replace(/\s+/g, " ").split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 40); }
-function overlap(a, b) {
-  const wa = new Set(a.toLowerCase().match(/[a-z0-9]{4,}/g) || []);
-  const wb = new Set(b.toLowerCase().match(/[a-z0-9]{4,}/g) || []);
-  let n = 0; wa.forEach(w => { if (wb.has(w)) n++; });
-  return n / Math.max(1, Math.min(wa.size, wb.size));
-}
-function weave() {
-  const packs = [["ChatGPT", gpt.value.trim()], ["Claude", claude.value.trim()], ["Grok", grok.value.trim()]].filter(p => p[1]);
-  if (packs.length < 2) { synthesis.textContent = "Need at least two replies."; return ""; }
-  const items = packs.map(([name, text]) => ({ name, lines: sentences(text) }));
-  const agreed = [];
-  items[0].lines.forEach(line => {
-    if (items.slice(1).some(o => o.lines.some(l => overlap(line, l) > 0.45))) agreed.push(line);
-  });
-  const unique = items.map(item => {
-    const only = item.lines.filter(line => !items.some(o => o.name !== item.name && o.lines.some(l => overlap(line, l) > 0.45)));
-    return item.name + ": " + (only.slice(0, 2).join(" ") || "Nothing clearly unique.");
-  });
-  const text = ["Where they agree", agreed.slice(0, 4).map(s => "• " + s).join("\n") || "• No shared sentence stood out.", "", "Only one of them said", unique.join("\n"), "", "Use agreement as the core. Check a lone claim before you rely on it."].join("\n");
-  synthesis.textContent = text;
-  return text;
-}
-function keep() {
-  const item = { q: q.value.trim(), gpt: gpt.value, claude: claude.value, grok: grok.value, thread: synthesis.textContent, at: new Date().toISOString() };
-  if (!item.q && !item.thread) return;
-  const all = JSON.parse(localStorage.getItem(HIST) || "[]");
-  all.unshift(item); localStorage.setItem(HIST, JSON.stringify(all.slice(0, 12))); renderHist();
-}
-function renderHist() {
-  const all = JSON.parse(localStorage.getItem(HIST) || "[]");
-  history.innerHTML = all.length ? "" : "<p class='note'>Nothing kept yet.</p>";
-  all.forEach((item) => {
-    const b = document.createElement("button");
-    b.textContent = (item.q || "Untitled thread").slice(0, 80);
-    b.onclick = () => { q.value = item.q; gpt.value = item.gpt; claude.value = item.claude; grok.value = item.grok; synthesis.textContent = item.thread; ["gpt","claude","grok"].forEach(count); };
-    history.appendChild(b);
-  });
-}
-async function askOne(url, headers, body) {
-  const res = await fetch(url, { method: "POST", headers, body: JSON.stringify(body) });
-  const data = await res.json();
-  if (!res.ok) throw new Error(data.error?.message || res.statusText);
-  return data;
-}
-function showErr(id, err) {
-  document.getElementById(id).textContent = /failed to fetch|network|cors/i.test(String(err)) ? "Browser blocked the call. Paste the reply instead." : String(err.message || err);
-}
-document.getElementById("ask").onclick = async () => {
-  const question = q.value.trim();
-  if (!question) return;
-  ["gptErr","claudeErr","grokErr"].forEach(id => document.getElementById(id).textContent = "");
-  const jobs = [
-    ["gpt", () => document.getElementById("openaiKey").value.trim() ? askOne("https://api.openai.com/v1/chat/completions", { Authorization: "Bearer " + document.getElementById("openaiKey").value.trim(), "Content-Type": "application/json" }, { model: openaiModel.value.trim() || "gpt-4.1", messages: [{ role: "user", content: question }] }).then(d => d.choices?.[0]?.message?.content || "") : Promise.reject(new Error("No OpenAI key."))],
-    ["claude", () => document.getElementById("anthropicKey").value.trim() ? askOne("https://api.anthropic.com/v1/messages", { "x-api-key": document.getElementById("anthropicKey").value.trim(), "anthropic-version": "2023-06-01", "content-type": "application/json" }, { model: claudeModel.value.trim() || "claude-sonnet-4-6", max_tokens: 1200, messages: [{ role: "user", content: question }] }).then(d => (d.content || []).map(c => c.text || "").join("\n")) : Promise.reject(new Error("No Anthropic key."))],
-    ["grok", () => document.getElementById("xaiKey").value.trim() ? askOne("https://api.x.ai/v1/chat/completions", { Authorization: "Bearer " + document.getElementById("xaiKey").value.trim(), "Content-Type": "application/json" }, { model: grokModel.value.trim() || "grok-4", messages: [{ role: "user", content: question }] }).then(d => d.choices?.[0]?.message?.content || "") : Promise.reject(new Error("No xAI key."))]
-  ];
-  await Promise.all(jobs.map(async ([id, fn]) => {
-    const box = document.getElementById(id);
-    const prior = box.value;
-    if (!prior) box.value = "Asking…";
-    try { box.value = await fn(); }
-    catch (err) { if (!prior) box.value = ""; showErr(id + "Err", err); }
-    count(id);
-  }));
-  weave(); keep();
-};
-document.getElementById("combine").onclick = () => { weave(); keep(); };
-document.getElementById("copy").onclick = async () => { await navigator.clipboard.writeText(synthesis.textContent); copy.textContent = "Copied"; setTimeout(() => copy.textContent = "Copy thread", 1200); };
-document.getElementById("save").onclick = () => {
-  const md = "# " + (q.value.trim() || "Moirai thread") + "\n\n## ChatGPT\n" + gpt.value + "\n\n## Claude\n" + claude.value + "\n\n## Grok\n" + grok.value + "\n\n## Thread\n" + synthesis.textContent + "\n";
-  const a = document.createElement("a"); a.href = URL.createObjectURL(new Blob([md], { type: "text/markdown" })); a.download = "moirai-thread.md"; a.click();
-};
-q.addEventListener("keydown", e => { if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); document.getElementById("ask").click(); } });
-renderHist();
+const KEY="moirai-keys";
+["openaiKey","openaiModel","anthropicKey","claudeModel","xaiKey","grokModel"].forEach(id=>{const s=JSON.parse(localStorage.getItem(KEY)||"{}"); if(s[id]) document.getElementById(id).value=s[id]; document.getElementById(id).onchange=()=>{const d={}; ["openaiKey","openaiModel","anthropicKey","claudeModel","xaiKey","grokModel"].forEach(k=>d[k]=document.getElementById(k).value.trim()); localStorage.setItem(KEY, JSON.stringify(d));};});
+function speak(text){ if(!window.speechSynthesis){ alert("This browser cannot speak."); return;} speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(text||"").slice(0,4000)); const v=speechSynthesis.getVoices().find(x=>/en/i.test(x.lang)); if(v) u.voice=v; speechSynthesis.speak(u); }
+document.getElementById("speak").onclick=()=>speak(synthesis.textContent);
+document.getElementById("stopVoice").onclick=()=>{ speechSynthesis.cancel(); if(window._hear) window._hear.stop(); listen.textContent="Listen"; };
+document.querySelectorAll("[data-speak]").forEach(b=>b.onclick=()=>speak(document.getElementById(b.dataset.speak).value));
+document.getElementById("listen").onclick=()=>{ const Rec=window.SpeechRecognition||window.webkitSpeechRecognition; if(!Rec){ alert("This browser cannot listen. On iPhone, open the page in Safari."); return;} if(window._hear && listen.textContent==="Listening"){ window._hear.stop(); return;} const hear=new Rec(); window._hear=hear; hear.lang="en-US"; hear.interimResults=true; hear.onresult=e=>{ q.value=[...e.results].map(r=>r[0].transcript).join(" "); }; hear.onend=()=>listen.textContent="Listen"; hear.onerror=()=>{ listen.textContent="Listen"; alert("Listening failed. Allow the microphone."); }; listen.textContent="Listening"; hear.start(); };
+function weave(){ const packs=[["ChatGPT",gpt.value],["Claude",claude.value],["Grok",grok.value]].filter(p=>p[1].trim()); if(packs.length<2){ synthesis.textContent="Need at least two replies."; return;} synthesis.textContent=packs.map(p=>p[0]+":\n"+p[1].trim().slice(0,500)).join("\n\n"); }
+document.getElementById("combine").onclick=weave;
+async function askOne(url, headers, body){ const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(body)}); const data=await res.json(); if(!res.ok) throw new Error(data.error&&data.error.message||res.statusText); return data; }
+document.getElementById("ask").onclick=async()=>{ const question=q.value.trim(); if(!question) return; const jobs=[["gpt", async()=>{ if(!openaiKey.value.trim()) throw new Error("No OpenAI key."); const d=await askOne("https://api.openai.com/v1/chat/completions",{Authorization:"Bearer "+openaiKey.value.trim(),"Content-Type":"application/json"},{model:openaiModel.value||"gpt-4.1",messages:[{role:"user",content:question}]}); return d.choices[0].message.content; }],["claude", async()=>{ if(!anthropicKey.value.trim()) throw new Error("No Anthropic key."); const d=await askOne("https://api.anthropic.com/v1/messages",{"x-api-key":anthropicKey.value.trim(),"anthropic-version":"2023-06-01","content-type":"application/json"},{model:claudeModel.value||"claude-sonnet-4-6",max_tokens:1200,messages:[{role:"user",content:question}]}); return (d.content||[]).map(c=>c.text||"").join("\n"); }],["grok", async()=>{ if(!xaiKey.value.trim()) throw new Error("No xAI key."); const d=await askOne("https://api.x.ai/v1/chat/completions",{Authorization:"Bearer "+xaiKey.value.trim(),"Content-Type":"application/json"},{model:grokModel.value||"grok-4",messages:[{role:"user",content:question}]}); return d.choices[0].message.content; }]]; await Promise.all(jobs.map(async ([id,fn])=>{ try { document.getElementById(id).value=await fn(); document.getElementById(id+"Err").textContent=""; } catch(err){ document.getElementById(id+"Err").textContent=/fetch|cors/i.test(String(err))?"Browser blocked the call. Paste the reply.":String(err.message||err);} })); weave(); };
 </script>
 </body>
 </html>
