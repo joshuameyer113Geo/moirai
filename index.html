@@ -174,6 +174,42 @@ details.crit summary{min-height:44px;display:flex;align-items:center;color:var(-
 .lib-open b{display:block;font-weight:400;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
 .lib-open small{color:var(--muted);font-size:12px}
 .lib-del{width:48px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:18px}
+/* access + own keys */
+.access .field{margin-bottom:10px}
+.acc-row{display:grid;grid-template-columns:1fr 1.25fr 1fr;gap:8px}
+.acc-row .btn{padding:8px 6px;white-space:nowrap;font-size:14px;letter-spacing:.02em}
+.acc-status{display:flex;align-items:center;gap:8px;margin:10px 0 0;font-size:13px;color:var(--muted)}
+.acc-status .dot{flex:none}
+.acc-status.ok{color:var(--ok)}
+.acc-status.bad{color:#ffb000}
+details.keys{padding:0 12px}
+details.keys summary{min-height:48px;display:flex;align-items:center;justify-content:space-between;gap:8px;color:var(--red-hi);font-size:13px;letter-spacing:.12em;cursor:pointer;list-style:none}
+details.keys summary::-webkit-details-marker{display:none}
+details.keys summary::after{content:"";width:8px;height:8px;border-right:1.6px solid var(--red-hi);border-bottom:1.6px solid var(--red-hi);transform:rotate(45deg) translateY(-2px);transition:transform .2s;margin-right:4px}
+details.keys[open] summary::after{transform:rotate(-135deg) translateY(-2px)}
+details.keys summary small{margin-left:auto;color:var(--muted);font-size:11px;letter-spacing:.06em}
+details.keys[open]{padding-bottom:2px}
+details.keys .group{margin-bottom:10px}
+.keys-note{font-size:12px;margin:0 0 10px}
+
+/* first-run welcome */
+.welcome{position:fixed;inset:0;z-index:55;display:flex;align-items:center;justify-content:center;overflow:auto;padding:calc(var(--sat) + 24px) calc(var(--sar) + 22px) calc(var(--sab) + 24px) calc(var(--sal) + 22px);background:radial-gradient(110% 60% at 50% 18%,rgba(60,4,14,.86) 0%,rgba(7,1,2,.9) 62%);-webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);animation:wIn .45s both}
+.welcome[hidden]{display:none}
+@keyframes wIn{from{opacity:0}}
+.w-in{width:100%;max-width:400px;text-align:center}
+.w-logo{width:96px;height:96px;border-radius:22px;box-shadow:0 0 0 1px var(--line-hi),0 0 34px rgba(255,42,61,.55);display:block;margin:0 auto 18px}
+.w-title{margin:0;font-size:38px;font-weight:400;letter-spacing:.42em;padding-left:.42em;color:var(--red);text-shadow:0 0 10px rgba(255,42,61,.85),0 0 30px rgba(255,42,61,.4)}
+.w-fates{margin:6px 0 0;font-size:11px;letter-spacing:.28em;color:var(--dim)}
+.w-threads{display:block;width:180px;height:18px;margin:16px auto 14px}
+.w-tag{margin:0 0 22px;color:var(--text);font-size:15px;line-height:1.55}
+.w-tag em{font-style:normal;color:var(--red-hi)}
+.w-form{text-align:left;background:var(--panel);border:1px solid var(--line-hi);border-radius:18px;padding:16px;box-shadow:0 0 30px rgba(255,42,61,.12)}
+.w-form input{font-size:18px;letter-spacing:.08em;text-align:center}
+.w-err{color:#ffb000;font-size:13px;margin:0 0 10px;text-align:center}
+.w-err:empty{display:none}
+.w-go{width:100%;min-height:52px;font-size:17px}
+.w-note{font-size:12px;color:var(--muted);margin:14px 0 2px}
+.w-own{font-size:13px;color:var(--muted)}
 .toast{position:fixed;left:50%;bottom:calc(var(--bar-h) + var(--sab) + 18px);transform:translate(-50%,20px);z-index:60;background:#1d0409;border:1px solid var(--red);color:#fff;padding:10px 16px;border-radius:12px;box-shadow:var(--glow);opacity:0;pointer-events:none;transition:all .25s;font-size:14px;max-width:88vw;text-align:center}
 .toast.show{opacity:1;transform:translate(-50%,0)}
 h1 .g{display:inline-block;animation:flick 6s infinite}
@@ -192,7 +228,7 @@ h1 .g{display:inline-block;animation:flick 6s infinite}
     <img class="logo" id="logo" src="icons/thread-weavers/icon-192.png" alt="" width="40" height="40" />
     <div class="brand"><h1><span class="g">MOIRAI</span></h1><p class="tag">ask one fate · or all three</p></div>
     <button class="icon-btn" id="openLibrary" aria-label="Library of past questions"><svg viewBox="0 0 24 24"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 5l3.5-1 3 15.5-3.5 1z"/></svg></button>
-    <button class="icon-btn" id="openSettings" aria-label="Settings and API keys"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+    <button class="icon-btn" id="openSettings" aria-label="Settings and access code"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
   </header>
 
   <section class="card" aria-label="Question">
@@ -215,7 +251,7 @@ h1 .g{display:inline-block;animation:flick 6s infinite}
     <div class="score-grid" id="scores"></div>
     <p class="muted" style="font-size:12px;margin:8px 0 0">First reply +1 · most words +3 · your Best pick +2</p>
   </section>
-  <p class="foot-note">Agreement is the safer core. A point only one model makes is a lead to check, not a fact. Keys stay in this browser.</p>
+  <p class="foot-note">Agreement is the safer core. A point only one model makes is a lead to check, not a fact. Own keys stay in this browser.</p>
 </div>
 
 <div class="bar" role="toolbar" aria-label="Primary actions">
@@ -258,18 +294,26 @@ h1 .g{display:inline-block;animation:flick 6s infinite}
   <div class="grab"><i></i></div>
   <div class="sheet-head"><h2>SETTINGS</h2><button class="link" data-close>done</button></div>
   <div class="sheet-body">
-    <fieldset class="group"><legend>Clotho · ChatGPT</legend>
-      <label class="field"><span>OpenAI key</span><input id="openaiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-…" /></label>
-      <label class="field"><span>Model</span><input id="openaiModel" type="text" autocapitalize="off" spellcheck="false" placeholder="gpt-4.1" /></label>
+    <fieldset class="group access"><legend>Access</legend>
+      <label class="field"><span>Access code</span><input id="accessCode" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="code from whoever shared Moirai" enterkeyhint="done" /></label>
+      <div class="acc-row"><button class="btn sm primary" id="accSave" type="button" aria-label="Save and check code">Save</button><button class="btn sm ghost" id="accShare" type="button" aria-label="Copy invite link">Invite link</button><button class="btn sm ghost" id="accClear" type="button">Remove</button></div>
+      <p class="acc-status" id="accStatus" role="status"><i class="dot" id="accDot"></i><span id="accText">No code yet.</span></p>
     </fieldset>
-    <fieldset class="group"><legend>Lachesis · Claude</legend>
-      <label class="field"><span>Anthropic key</span><input id="anthropicKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…" /></label>
-      <label class="field"><span>Model</span><input id="claudeModel" type="text" autocapitalize="off" spellcheck="false" placeholder="claude-sonnet-4-6" /></label>
-    </fieldset>
-    <fieldset class="group"><legend>Atropos · Grok</legend>
-      <label class="field"><span>xAI key</span><input id="xaiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="xai-…" /></label>
-      <label class="field"><span>Model</span><input id="grokModel" type="text" autocapitalize="off" spellcheck="false" placeholder="grok-4" /></label>
-    </fieldset>
+    <details class="group keys" id="keysWrap"><summary>Own API keys (optional)<small id="keysCount"></small></summary>
+      <p class="muted keys-note">Only needed if you don't have an access code. Keys stay in this browser and go straight to each provider.</p>
+      <fieldset class="group"><legend>Clotho · ChatGPT</legend>
+        <label class="field"><span>OpenAI key</span><input id="openaiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-…" /></label>
+        <label class="field"><span>Model</span><input id="openaiModel" type="text" autocapitalize="off" spellcheck="false" placeholder="gpt-4.1" /></label>
+      </fieldset>
+      <fieldset class="group"><legend>Lachesis · Claude</legend>
+        <label class="field"><span>Anthropic key</span><input id="anthropicKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…" /></label>
+        <label class="field"><span>Model</span><input id="claudeModel" type="text" autocapitalize="off" spellcheck="false" placeholder="claude-sonnet-4-6" /></label>
+      </fieldset>
+      <fieldset class="group"><legend>Atropos · Grok</legend>
+        <label class="field"><span>xAI key</span><input id="xaiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="xai-…" /></label>
+        <label class="field"><span>Model</span><input id="grokModel" type="text" autocapitalize="off" spellcheck="false" placeholder="grok-4" /></label>
+      </fieldset>
+    </details>
     <fieldset class="group"><legend>App icon</legend>
       <div class="icon-pick" id="iconPick" role="radiogroup" aria-label="App icon"></div>
       <p class="muted icon-note">iPhone sets the home-screen icon when you tap Add to Home Screen. Pick one first; to change later, remove the app and add it again.</p>
@@ -280,7 +324,24 @@ h1 .g{display:inline-block;animation:flick 6s infinite}
     <fieldset class="group"><legend>Data</legend>
       <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ghost" id="resetScores">Reset scores</button><button class="btn sm ghost" id="clearLib">Clear library</button></div>
     </fieldset>
-    <p class="muted" style="font-size:12px">Keys and model ids are stored only in this browser (localStorage) and sent straight to each provider. If a call is blocked, paste that reply into its panel and weave. On iPhone the mic works best in Safari.</p>
+    <p class="muted" style="font-size:12px">With an access code, questions go through the Moirai server, which doesn't log them. Own keys and model ids are stored only in this browser and sent straight to each provider. If a call is blocked, paste that reply into its panel and weave. On iPhone the mic works best in Safari.</p>
+  </div>
+</section>
+
+<section class="welcome" id="welcome" role="dialog" aria-modal="true" aria-labelledby="wTitle" hidden>
+  <div class="w-in">
+    <img class="w-logo" id="wLogo" src="icons/thread-weavers/icon-192.png" alt="" width="96" height="96" />
+    <h2 class="w-title" id="wTitle"><span class="g">MOIRAI</span></h2>
+    <p class="w-fates">CLOTHO · LACHESIS · ATROPOS</p>
+    <svg class="w-threads" viewBox="0 0 180 18" aria-hidden="true" fill="none" stroke-width="1.4" stroke-linecap="round"><path d="M2 9 C30 1 60 17 90 9 S150 1 178 9" stroke="#ff2a3d"/><path d="M2 9 C30 17 60 1 90 9 S150 17 178 9" stroke="#ff6b78" opacity=".8"/><path d="M2 9 H178" stroke="#9a0016" opacity=".9"/></svg>
+    <p class="w-tag">Ask <em>ChatGPT</em>, <em>Claude</em> and <em>Grok</em> at once, then weave the thread they share.</p>
+    <form class="w-form" id="wForm" autocomplete="off" novalidate>
+      <label class="field"><span>Access code</span><input id="wCode" type="text" autocomplete="off" autocapitalize="off" autocorrect="off" spellcheck="false" placeholder="enter your code" enterkeyhint="go" /></label>
+      <p class="w-err" id="wErr" role="alert"></p>
+      <button class="btn primary w-go" id="wGo" type="submit">Enter</button>
+    </form>
+    <p class="w-note">Got a code or link from a friend? That's all you need. No API keys.</p>
+    <button class="link w-own" id="wOwn" type="button">Use my own API keys instead</button>
   </div>
 </section>
 
@@ -288,6 +349,10 @@ h1 .g{display:inline-block;animation:flick 6s infinite}
 
 <script>
 "use strict";
+/* Shared-access server (Cloudflare Worker in server/). Set this after `wrangler deploy`.
+   While it contains YOUR-SUBDOMAIN the app treats the shared server as not set up.
+   Testing: open the app with ?server=http://localhost:8787 (stored in this browser; ?server=reset clears it). */
+const SERVER_URL = "https://moirai.YOUR-SUBDOMAIN.workers.dev";
 const $ = (s, r=document) => r.querySelector(s);
 const $$ = (s, r=document) => [...r.querySelectorAll(s)];
 const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
@@ -309,7 +374,7 @@ const state = { arrived:[], session:null, scoredSig:null, best:null, crit:{}, bu
 document.addEventListener("pointerdown", e=>{ const b=e.target.closest("button"); if(!b||b.disabled) return; b.classList.add("press"); if(navigator.vibrate) try{navigator.vibrate(8);}catch{} });
 ["pointerup","pointercancel","pointerleave"].forEach(t=>document.addEventListener(t, ()=>$$(".press").forEach(b=>b.classList.remove("press")), true));
 
-function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
+function toast(msg,ms){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),ms||2200); }
 
 /* ---------- build panels + tabs ---------- */
 const tabs=$("#tabs"), track=$("#track");
@@ -353,9 +418,63 @@ CHIPS.forEach(([label,text])=>$("#chips").append(h("button",{class:"chip",role:"
 /* ---------- settings ---------- */
 const saved=store.get(KEY,{});
 SETTING_IDS.forEach(id=>{ const el=$("#"+id); el.value=saved[id]||""; el.addEventListener("input", saveSettings); });
-function saveSettings(){ const d={}; SETTING_IDS.forEach(k=>d[k]=$("#"+k).value.trim()); store.set(KEY,d); FATES.forEach(f=>$("#"+f.id+"ModelLabel").textContent=modelOf(f)); }
+function saveSettings(){ const d={}; SETTING_IDS.forEach(k=>d[k]=$("#"+k).value.trim()); store.set(KEY,d); FATES.forEach(f=>$("#"+f.id+"ModelLabel").textContent=modelOf(f)); renderKeysCount(); }
 const keyOf=f=>$("#"+f.keyId).value.trim(), modelOf=f=>$("#"+f.modelId).value.trim()||f.def;
 FATES.forEach(f=>$("#"+f.id+"ModelLabel").textContent=modelOf(f));
+const hasAnyKey=()=>FATES.some(f=>keyOf(f));
+function renderKeysCount(){ const n=FATES.filter(f=>keyOf(f)).length; $("#keysCount").textContent=n?n+" of 3 set":""; }
+renderKeysCount();
+
+/* ---------- shared access (code -> Moirai server) ---------- */
+const ACCESS="moirai-access", SERVER_KEY="moirai-server", WELCOMED="moirai-welcomed";
+let linkCode=null;
+// Share links: ?code=XYZ fills the code; ?server=URL points at a test server. Both are stripped from the address bar.
+(function readLinkParams(){ let u; try{ u=new URL(location.href); }catch{ return; } let changed=false;
+  if(u.searchParams.has("server")){ changed=true; const srv=u.searchParams.get("server").trim(); u.searchParams.delete("server");
+    if(!srv||/^(reset|default|off)$/i.test(srv)){ try{ localStorage.removeItem(SERVER_KEY); }catch{} }
+    else{ try{ const x=new URL(srv), local=x.protocol==="http:"&&/^(localhost|127\.0\.0\.1)$/.test(x.hostname);
+      // Remote test servers need an explicit OK so a link can't silently reroute your questions.
+      if(local||(x.protocol==="https:"&&confirm("Send questions through this test server?\n"+x.origin))) store.set(SERVER_KEY,(x.origin+x.pathname).replace(/\/+$/,"")); }catch{} } }
+  if(u.searchParams.has("code")){ changed=true; linkCode=u.searchParams.get("code").trim().slice(0,200)||null; u.searchParams.delete("code"); }
+  if(changed) history.replaceState(history.state,"",u.pathname+u.search+u.hash); })();
+const serverUrl=()=>String(store.get(SERVER_KEY,"")||SERVER_URL).replace(/\/+$/,"");
+const serverReady=()=>!/YOUR-SUBDOMAIN/i.test(serverUrl());
+let access=store.get(ACCESS,{}); if(typeof access!=="object"||!access) access={};
+const codeOf=()=>String(access.code||"").trim();
+function setCode(c){ access={code:String(c||"").trim()}; store.set(ACCESS,access); $("#accessCode").value=access.code; }
+$("#accessCode").value=codeOf();
+const SERVER_MSG={ code:"Access code not accepted. Check it in Settings.", down:"Can't reach the Moirai server. Check your connection and try again.",
+  unset:"The shared server isn't set up yet. Use your own API keys for now." };
+function srvErr(kind,msg,status){ const e=new Error(msg||SERVER_MSG[kind]); e.kind=kind; e.status=status; return e; }
+async function serverFetch(path,{code,...init}={}){
+  if(!serverReady()) throw srvErr("unset");
+  let res; try{ res=await fetch(serverUrl()+path,{...init,cache:"no-store",headers:{...(init.headers||{}),"X-Moirai-Code":code??codeOf()}}); }catch{ throw srvErr("down"); }
+  let data=null; try{ data=await res.json(); }catch{}
+  if(res.ok&&data) return data;
+  const m=data&&data.error&&data.error.message;
+  if(res.status===401) throw srvErr("code",null,401);
+  if(res.status===429) throw srvErr("limit",m||"Daily limit reached. It resets at midnight UTC.",429);
+  if(res.status>=500) throw srvErr("upstream",m||`The Moirai server is having trouble (${res.status}). Try again soon.`,res.status);
+  throw srvErr("bad",m||`Server error ${res.status}`,res.status); }
+let accInfo=null;
+function renderAccess(kind,data){ const st=$("#accStatus"), dot=$("#accDot"), t=$("#accText"); let cls="", tone="", msg;
+  if(kind==="ok"){ accInfo=data; cls="has"; tone="ok"; msg=`Connected · ${data.remaining} of ${data.limit} requests left today`; }
+  else if(kind==="checking"){ cls="busy"; msg="Checking code…"; }
+  else if(kind==="none"){ msg=hasAnyKey()?"No code. Using your own API keys.":"No code yet. Enter one, or add your own keys below."; }
+  else { cls="err"; tone="bad"; msg=kind==="code"?"Code not accepted. Check it, or ask for a new one.":kind==="limit"?"Daily limit reached · resets at midnight UTC.":kind==="unset"?"Shared server isn't set up yet.":kind==="down"?"Can't reach the Moirai server right now.":"Server problem. Try again soon."; }
+  dot.className="dot"+(cls?" "+cls:""); st.className="acc-status"+(tone?" "+tone:""); t.textContent=msg; }
+function noteRemaining(n){ if(accInfo&&typeof n==="number"){ accInfo={...accInfo,remaining:n,used:accInfo.limit-n}; renderAccess("ok",accInfo); } }
+async function checkAccess(){ if(!codeOf()){ renderAccess("none"); return null; } renderAccess("checking");
+  try{ const s=await serverFetch("/status"); renderAccess("ok",s); return s; }catch(e){ renderAccess(e.kind); throw e; } }
+async function saveCode(){ const c=$("#accessCode").value.trim(); if(!c){ setCode(""); renderAccess("none"); toast("Access code removed"); return; }
+  setCode(c); try{ const s=await checkAccess(); toast(`Code saved · ${s.remaining} requests left today`); }catch(e){ toast(e.message,4000); } }
+$("#accSave").onclick=saveCode;
+$("#accessCode").addEventListener("keydown",e=>{ if(e.key==="Enter"){ e.preventDefault(); saveCode(); } });
+$("#accClear").onclick=()=>{ setCode(""); accInfo=null; renderAccess("none"); toast("Access code removed"); };
+$("#accShare").onclick=async()=>{ const c=$("#accessCode").value.trim(); if(!c){ toast("Type a code first, then copy its invite link."); return; }
+  const link=location.origin+location.pathname+"?code="+encodeURIComponent(c);
+  try{ await navigator.clipboard.writeText(link); toast("Invite link copied"); }catch{ prompt("Copy this invite link:",link); } };
+renderAccess(codeOf()?"checking":"none");
 
 /* ---------- sheets ---------- */
 const scrim=$("#scrim"); let openSheet=null, lastFocus=null;
@@ -364,7 +483,7 @@ function hideSheet(quick){ if(!openSheet) return; openSheet.style.transform=""; 
 scrim.onclick=()=>hideSheet(); $$("[data-close]").forEach(b=>b.onclick=()=>hideSheet());
 document.addEventListener("keydown", e=>{ if(e.key==="Escape") hideSheet(); });
 $$(".sheet").forEach(sh=>{ const g=$(".grab",sh); let y0=null,dy=0; g.addEventListener("pointerdown",e=>{ y0=e.clientY; dy=0; g.setPointerCapture(e.pointerId); sh.style.transition="none"; }); g.addEventListener("pointermove",e=>{ if(y0==null) return; dy=Math.max(0,e.clientY-y0); sh.style.transform=`translateY(${dy}px)`; }); const end=()=>{ if(y0==null) return; sh.style.transition=""; y0=null; if(dy>80) hideSheet(); else sh.style.transform=""; }; g.addEventListener("pointerup",end); g.addEventListener("pointercancel",end); });
-$("#openSettings").onclick=()=>showSheet("settingsSheet");
+$("#openSettings").onclick=()=>{ showSheet("settingsSheet"); if(codeOf()) checkAccess().catch(()=>{}); else renderAccess("none"); };
 $("#openLibrary").onclick=()=>showSheet("librarySheet");
 $("#openMore").onclick=()=>showSheet("moreSheet");
 $("#libBtn2").onclick=()=>showSheet("librarySheet");
@@ -383,7 +502,7 @@ $$("#rainSeg button").forEach(b=>b.onclick=()=>{ prefs.rain=b.dataset.rain; stor
 /* ---------- app icon picker ---------- */
 const ICON_KEY="moirai-icon", ICONS=[["thread-weavers","Thread Weavers"],["neon-cauldron","Neon Cauldron"],["arcane","Arcane"],["classic","Classic"]];
 function applyIcon(v){ if(!ICONS.some(([id])=>id===v)) v=ICONS[0][0]; const b=`icons/${v}/`;
-  $("#touchIcon").href=b+"apple-touch-icon.png"; $("#favSvg").href=b+"icon.svg"; $("#favPng").href=b+"favicon-32.png"; $("#logo").src=b+"icon-192.png";
+  $("#touchIcon").href=b+"apple-touch-icon.png"; $("#favSvg").href=b+"icon.svg"; $("#favPng").href=b+"favicon-32.png"; $("#logo").src=b+"icon-192.png"; $("#wLogo").src=b+"icon-192.png";
   $$("#iconPick button").forEach(x=>{ const on=x.dataset.icon===v; x.setAttribute("aria-checked",on?"true":"false"); x.tabIndex=on?0:-1; }); return v; }
 ICONS.forEach(([id,name])=>$("#iconPick").append(h("button",{type:"button",role:"radio","data-icon":id,"aria-label":name+" icon",onclick:()=>{ store.set(ICON_KEY,applyIcon(id)); toast(name+" icon set"); }},h("img",{src:`icons/${id}/icon-192.png`,alt:"",width:"56",height:"56",loading:"lazy"}),name)));
 applyIcon(store.get(ICON_KEY,window.__moiraiIcon||ICONS[0][0]));
@@ -401,12 +520,17 @@ listenBtn.onclick=()=>{ const Rec=window.SpeechRecognition||window.webkitSpeechR
 /* ---------- API calls ---------- */
 async function post(url, headers, body){ const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(body)}); let data={}; try{ data=await res.json(); }catch{} if(!res.ok) throw new Error((data.error&&(data.error.message||data.error))||res.status+" "+res.statusText); return data; }
 function callModel(id, prompt){ const f=byId[id], key=keyOf(f), model=modelOf(f);
-  if(!key) return Promise.reject(new Error(`No ${f.name} key — add it in Settings, or paste a reply.`));
+  // With an access code every call goes through the Moirai server; own keys call providers directly.
+  if(codeOf()) return serverFetch("/ask",{method:"POST",headers:{"Content-Type":"application/json"},body:JSON.stringify({provider:id,model,prompt,max_tokens:1600})})
+    .then(d=>{ noteRemaining(d.remaining); return d.text||""; });
+  if(!key) return Promise.reject(new Error(`No ${f.name} key. Enter an access code or add a key in Settings, or paste a reply.`));
   const msgs=[{role:"user",content:prompt}];
   if(id==="gpt") return post("https://api.openai.com/v1/chat/completions",{"Authorization":"Bearer "+key,"Content-Type":"application/json"},{model,messages:msgs}).then(d=>d.choices[0].message.content||"");
   if(id==="claude") return post("https://api.anthropic.com/v1/messages",{"x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true","content-type":"application/json"},{model,max_tokens:1600,messages:msgs}).then(d=>(d.content||[]).map(c=>c.text||"").join("\n"));
   return post("https://api.x.ai/v1/chat/completions",{"Authorization":"Bearer "+key,"Content-Type":"application/json"},{model,messages:msgs}).then(d=>d.choices[0].message.content||"");
 }
+// Server problems (wrong code, daily limit, server down) also get a toast; renderAccess keeps Settings in sync.
+function serverToast(e){ if(!e||!["code","limit","down","unset"].includes(e.kind)) return; toast(e.message,4500); renderAccess(e.kind); }
 const errText=err=>/failed to fetch|load failed|networkerror|cors/i.test(String(err&&err.message||err))?"Browser blocked the call (network/CORS). Paste the reply instead.":String(err&&err.message||err);
 function setBusy(id,on){ const p=$("#panel-"+id), d=$("#"+id+"Dot"); p.classList.toggle("busy",on); on?state.busy.add(id):state.busy.delete(id); d.className="dot"+(on?" busy":""); $$(`[data-ask="${id}"]`).forEach(b=>b.disabled=on); $("#ask").disabled=state.busy.size>0; }
 async function askIds(ids){ const question=$("#q").value.trim(); if(!question){ toast("Ask a question first."); $("#q").focus(); return; }
@@ -414,7 +538,7 @@ async function askIds(ids){ const question=$("#q").value.trim(); if(!question){ 
   if(ids.length===1) goTo(FATES.findIndex(f=>f.id===ids[0]));
   await Promise.all(ids.map(async id=>{ const box=$("#"+id), err=$("#"+id+"Err"); err.textContent=""; setBusy(id,true);
     try{ const text=await callModel(id,question); box.value=text.trim(); if(!state.arrived.includes(id)) state.arrived.push(id); }
-    catch(e){ err.textContent=errText(e); setBusy(id,false); $("#"+id+"Dot").className="dot err"; return; }
+    catch(e){ err.textContent=errText(e); serverToast(e); setBusy(id,false); $("#"+id+"Dot").className="dot err"; return; }
     setBusy(id,false); updateCounts(); }));
   updateCounts(); if(ids.length>1 && filled().length>=2) weave(); saveToLibrary(true);
 }
@@ -448,10 +572,10 @@ $("#combine").onclick=()=>{ weave(); if(lastWeave) $("#synthesis").scrollIntoVie
 function threadText(){ if(!lastWeave) return ""; let t=""; if(lastWeave.agree.length) t+="Where they agree. "+lastWeave.agree.map(a=>a.text).join(" ")+"\n\n"; if(lastWeave.solo.length) t+="Only one of them said. "+lastWeave.solo.map(x=>x.f.name+": "+x.list.join(" ")).join("\n"); return t.trim(); }
 
 /* ---------- check each other ---------- */
-$("#checkBtn").onclick=async()=>{ hideSheet(); const have=filled(); if(have.length<2){ toast("Need at least two replies to cross-check."); return; } const q=$("#q").value.trim()||"(question not given)"; const runners=have.filter(f=>keyOf(f)); if(!runners.length){ toast("Add at least one API key in Settings."); return; } toast("The Fates are checking each other…");
+$("#checkBtn").onclick=async()=>{ hideSheet(); const have=filled(); if(have.length<2){ toast("Need at least two replies to cross-check."); return; } const q=$("#q").value.trim()||"(question not given)"; const runners=have.filter(f=>codeOf()||keyOf(f)); if(!runners.length){ toast("Enter an access code or add an API key in Settings."); return; } toast("The Fates are checking each other…");
   await Promise.all(runners.map(async f=>{ const others=have.filter(o=>o.id!==f.id); const prompt=`Question: ${q}\n\nTwo other AI models answered. Critique their answers briefly: point out errors, missing points, or overstatements, then say what you agree with. Be concrete and short.\n\n`+others.map(o=>`--- ${o.name} ---\n${$("#"+o.id).value.trim()}`).join("\n\n");
     const wrap=$("#"+f.id+"CritWrap"), body=$("#"+f.id+"Crit"); wrap.hidden=false; wrap.open=true; body.textContent="Checking…"; setBusy(f.id,true);
-    try{ const t=(await callModel(f.id,prompt)).trim(); body.textContent=t; state.crit[f.id]=t; }catch(e){ body.textContent=errText(e); }
+    try{ const t=(await callModel(f.id,prompt)).trim(); body.textContent=t; state.crit[f.id]=t; }catch(e){ body.textContent=errText(e); serverToast(e); }
     setBusy(f.id,false); updateCounts(); }));
   saveToLibrary(true);
 };
@@ -500,6 +624,24 @@ $("#resetScores").onclick=()=>{ if(confirm("Reset all scores to zero?")){ store.
 $("#newBtn").onclick=()=>{ hideSheet(); $("#q").value=""; FATES.forEach(f=>{ $("#"+f.id).value=""; $("#"+f.id+"Err").textContent=""; $("#"+f.id+"CritWrap").hidden=true; }); state.session=null; state.crit={}; state.arrived=[]; clearBest(); lastWeave=null; $("#synthesis").replaceChildren(h("p",{class:"empty"},"Ask one, or all three, then weave.")); updateCounts(); goTo(0); $("#q").focus(); };
 
 updateCounts();
+
+/* ---------- first-run welcome ---------- */
+const welcome=$("#welcome");
+function showWelcome(prefill,msg){ welcome.hidden=false; if(prefill!=null) $("#wCode").value=prefill; $("#wErr").textContent=msg||""; }
+function hideWelcome(){ welcome.hidden=true; store.set(WELCOMED,true); }
+$("#wForm").addEventListener("submit",async e=>{ e.preventDefault(); const c=$("#wCode").value.trim(), go=$("#wGo"), er=$("#wErr");
+  if(!c){ er.textContent="Enter the code you were given."; $("#wCode").focus(); return; }
+  er.textContent=""; go.disabled=true; go.textContent="Checking…";
+  try{ const s=await serverFetch("/status",{code:c}); setCode(c); renderAccess("ok",s); hideWelcome(); $("#wCode").blur(); toast(`You're in · ${s.remaining} questions left today`,3000); }
+  catch(err){ er.textContent=err.kind==="code"?"That code wasn't accepted. Check for typos, or ask for a new one.":err.message; }
+  finally{ go.disabled=false; go.textContent="Enter"; } });
+$("#wOwn").onclick=()=>{ hideWelcome(); $("#keysWrap").open=true; showSheet("settingsSheet"); renderAccess("none"); setTimeout(()=>$("#keysWrap").scrollIntoView({block:"start",behavior:"smooth"}),350); };
+if(linkCode){ // arrived via a share link
+  setCode(linkCode); store.set(WELCOMED,true);
+  checkAccess().then(s=>toast(`Access code added · ${s.remaining} questions left today`,3000))
+    .catch(e=>{ if(e.kind==="code"){ setCode(""); renderAccess("none"); showWelcome(linkCode,"That invite code wasn't accepted. Check it, or ask for a new link."); } else toast(e.message,4500); });
+} else if(codeOf()) checkAccess().catch(e=>{ if(["code","limit"].includes(e.kind)) toast(e.message,4500); });
+else if(!hasAnyKey() && !store.get(WELCOMED,false)) showWelcome();
 
 /* ---------- service worker (needs same-origin https, e.g. GitHub Pages) ---------- */
 if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1")){

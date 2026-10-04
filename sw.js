@@ -1,6 +1,7 @@
 /* Moirai service worker: caches the app shell for offline use.
-   Never caches API calls (POSTs to OpenAI/Anthropic/xAI pass straight through). */
-const VERSION = "moirai-v4";
+   Never caches API calls: POSTs to OpenAI/Anthropic/xAI and the Moirai server (/ask, /status)
+   pass straight through untouched. */
+const VERSION = "moirai-v5";
 const ICON_VARIANTS = ["neon-cauldron", "thread-weavers", "arcane", "classic"];
 const ICON_FILES = ["icon.svg", "icon-192.png", "icon-512.png", "icon-maskable-192.png",
   "icon-maskable-512.png", "apple-touch-icon.png", "favicon-32.png"];
@@ -22,8 +23,9 @@ self.addEventListener("activate", e => {
 
 self.addEventListener("fetch", e => {
   const req = e.request;
-  if (req.method !== "GET") return;
+  if (req.method !== "GET") return;               // POST /ask etc. never touch the cache
   const url = new URL(req.url);
+  if (/\/(ask|status|health)$/.test(url.pathname)) return; // shared-server endpoints: network only
 
   if (url.origin !== location.origin) return;
 
