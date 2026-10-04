@@ -1,0 +1,199 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Moirai</title>
+<link rel="icon" href="icon.svg" type="image/svg+xml" />
+<meta name="description" content="Moirai asks ChatGPT, Claude, and Grok, then shows the thread they share." />
+<meta name="theme-color" content="#f6f5f2" />
+<style>
+  :root { --bg:#f6f5f2; --panel:#ffffff; --line:#e4e1da; --text:#1c1b19; --muted:#6f6a62; --accent:#1f4b99; --good:#3d6b4f; --gold:#8a7344; }
+  * { box-sizing: border-box; }
+  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.45 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif; }
+  header, main { max-width: 980px; margin: 0 auto; }
+  header { padding: 22px 16px 10px; display: flex; gap: 14px; align-items: flex-start; }
+  .mark { width: 54px; height: 54px; flex: none; }
+  h1 { font-size: 26px; margin: 0; font-weight: 600; letter-spacing: -0.02em; }
+  .lead, .note { color: var(--muted); font-size: 13px; }
+  .meander { height: 10px; margin: 8px 16px 14px; max-width: 948px; margin-left: auto; margin-right: auto; background: repeating-linear-gradient(90deg, transparent 0 8px, var(--gold) 8px 10px, transparent 10px 18px, var(--gold) 18px 20px); opacity: .55; }
+  main { padding: 0 16px 48px; }
+  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 16px; padding: 16px; margin-bottom: 12px; box-shadow: 0 1px 2px rgba(28,27,25,.04); }
+  label { display: block; color: var(--muted); font-size: 12px; margin: 8px 0 4px; }
+  input, textarea, select { width: 100%; background: #fafaf8; color: var(--text); border: 1px solid var(--line); border-radius: 10px; padding: 10px 12px; font-size: 15px; }
+  textarea { min-height: 90px; resize: vertical; }
+  .grid { display: grid; grid-template-columns: 1fr; gap: 10px; }
+  @media (min-width: 800px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
+  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
+  button { border: 1px solid var(--line); background: #fff; color: var(--text); border-radius: 999px; padding: 8px 14px; font-size: 13px; }
+  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); font-weight: 650; }
+  .kicker { color: var(--good); font-size: 11px; letter-spacing: .06em; text-transform: uppercase; margin-bottom: 8px; }
+  .out { white-space: pre-wrap; font-size: 14px; min-height: 80px; }
+  .err { color: #9b3a3a; font-size: 12px; }
+  details { margin-top: 8px; color: var(--muted); }
+</style>
+</head>
+<body>
+<header>
+  <svg class="mark" viewBox="0 0 64 64" aria-hidden="true">
+    <rect x="2" y="2" width="60" height="60" rx="10" fill="#f7f4ee" stroke="#c8b48a"/>
+    <path d="M8 8h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6zM8 50h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6zm8 0h6v6h-6z" fill="#c8b48a"/>
+    <path d="M20 44c0-10 6-14 6-22" fill="none" stroke="#8a7344" stroke-width="1.4"/>
+    <path d="M32 18v28M44 22l6 8-6 8" fill="none" stroke="#8a7344" stroke-width="1.6" stroke-linecap="round"/>
+    <circle cx="20" cy="18" r="3" fill="none" stroke="#8a7344"/>
+  </svg>
+  <div>
+    <h1>Moirai</h1>
+    <p class="lead">Clotho spins, Lachesis measures, Atropos cuts. One question to ChatGPT, Claude, and Grok, then the thread they share. This does not merge their models.</p>
+  </div>
+</header>
+<div class="meander"></div>
+<main>
+  <section class="card">
+    <label>Question</label>
+    <textarea id="q" placeholder="Ask one clear question."></textarea>
+    <div class="row">
+      <button class="primary" id="ask">Ask all three</button>
+      <button id="combine">Combine what is on screen</button>
+    </div>
+    <p class="note">Keys stay in this browser and are sent only to that provider. A phone browser often blocks these calls. If a panel says CORS, paste that model’s reply into the box instead. Change the model id if your key uses a newer name.</p>
+    <details>
+      <summary>API keys and model ids</summary>
+      <label>OpenAI key</label><input id="openaiKey" type="password" placeholder="sk-..." />
+      <label>OpenAI model</label><input id="openaiModel" value="gpt-4.1" />
+      <label>Anthropic key</label><input id="anthropicKey" type="password" placeholder="sk-ant-..." />
+      <label>Claude model</label><input id="claudeModel" value="claude-sonnet-4-6" />
+      <label>xAI key</label><input id="xaiKey" type="password" placeholder="xai-..." />
+      <label>Grok model</label><input id="grokModel" value="grok-4" />
+    </details>
+  </section>
+  <section class="grid">
+    <article class="card"><div class="kicker">Clotho · ChatGPT</div><textarea id="gpt" placeholder="Reply appears here, or paste one."></textarea><div class="err" id="gptErr"></div></article>
+    <article class="card"><div class="kicker">Lachesis · Claude</div><textarea id="claude" placeholder="Reply appears here, or paste one."></textarea><div class="err" id="claudeErr"></div></article>
+    <article class="card"><div class="kicker">Atropos · Grok</div><textarea id="grok" placeholder="Reply appears here, or paste one."></textarea><div class="err" id="grokErr"></div></article>
+  </section>
+  <section class="card">
+    <div class="kicker">The thread</div>
+    <div class="out" id="synthesis">Ask the models, or paste three replies, then combine.</div>
+  </section>
+</main>
+<script>
+const KEY = "model-council-keys";
+const fields = ["openaiKey","openaiModel","anthropicKey","claudeModel","xaiKey","grokModel"];
+const saved = JSON.parse(localStorage.getItem(KEY) || "{}");
+fields.forEach(id => { if (saved[id]) document.getElementById(id).value = saved[id]; });
+fields.forEach(id => document.getElementById(id).addEventListener("change", saveKeys));
+function saveKeys() {
+  const data = {};
+  fields.forEach(id => data[id] = document.getElementById(id).value.trim());
+  localStorage.setItem(KEY, JSON.stringify(data));
+}
+function sentences(text) {
+  return (text || "").replace(/\s+/g, " ").split(/(?<=[.!?])\s+/).map(s => s.trim()).filter(s => s.length > 40);
+}
+function overlap(a, b) {
+  const wa = new Set(a.toLowerCase().match(/[a-z0-9]{4,}/g) || []);
+  const wb = new Set(b.toLowerCase().match(/[a-z0-9]{4,}/g) || []);
+  let n = 0; wa.forEach(w => { if (wb.has(w)) n++; });
+  return n / Math.max(1, Math.min(wa.size, wb.size));
+}
+function combine() {
+  const packs = [
+    ["ChatGPT", document.getElementById("gpt").value.trim()],
+    ["Claude", document.getElementById("claude").value.trim()],
+    ["Grok", document.getElementById("grok").value.trim()]
+  ].filter(p => p[1]);
+  if (packs.length < 2) {
+    document.getElementById("synthesis").textContent = "Need at least two replies to compare.";
+    return;
+  }
+  const items = packs.map(([name, text]) => ({ name, text, lines: sentences(text) }));
+  const agreed = [];
+  const seen = new Set();
+  items[0].lines.forEach(line => {
+    const hits = items.slice(1).filter(other => other.lines.some(l => overlap(line, l) > 0.45));
+    if (hits.length && !seen.has(line)) { agreed.push(line); seen.add(line); }
+  });
+  const unique = items.map(item => {
+    const only = item.lines.filter(line => !items.some(other => other.name !== item.name && other.lines.some(l => overlap(line, l) > 0.45)));
+    return item.name + ": " + (only.slice(0, 2).join(" ") || "No clear point that the others missed.");
+  });
+  const text = [
+    "Where they agree",
+    agreed.slice(0, 4).map(s => "• " + s).join("\n") || "• No shared sentence stood out. Read the three replies; the split may be the useful part.",
+    "",
+    "What only one of them said",
+    unique.join("\n"),
+    "",
+    "How to use this",
+    "Treat agreement as the safer core. Treat a lone point as a lead to check, not as a fact. This page did not re-ask a fourth model."
+  ].join("\n");
+  document.getElementById("synthesis").textContent = text;
+}
+async function askOpenAI(q) {
+  const key = document.getElementById("openaiKey").value.trim();
+  if (!key) return { error: "No OpenAI key. Paste a ChatGPT reply instead." };
+  const res = await fetch("https://api.openai.com/v1/chat/completions", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: document.getElementById("openaiModel").value.trim() || "gpt-4.1", messages: [{ role: "user", content: q }] })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || res.statusText);
+  return { text: data.choices?.[0]?.message?.content || "" };
+}
+async function askClaude(q) {
+  const key = document.getElementById("anthropicKey").value.trim();
+  if (!key) return { error: "No Anthropic key. Paste a Claude reply instead." };
+  const res = await fetch("https://api.anthropic.com/v1/messages", {
+    method: "POST",
+    headers: { "x-api-key": key, "anthropic-version": "2023-06-01", "content-type": "application/json" },
+    body: JSON.stringify({ model: document.getElementById("claudeModel").value.trim() || "claude-sonnet-4-6", max_tokens: 1200, messages: [{ role: "user", content: q }] })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || res.statusText);
+  return { text: (data.content || []).map(c => c.text || "").join("\n") };
+}
+async function askGrok(q) {
+  const key = document.getElementById("xaiKey").value.trim();
+  if (!key) return { error: "No xAI key. Paste a Grok reply instead." };
+  const res = await fetch("https://api.x.ai/v1/chat/completions", {
+    method: "POST",
+    headers: { "Authorization": "Bearer " + key, "Content-Type": "application/json" },
+    body: JSON.stringify({ model: document.getElementById("grokModel").value.trim() || "grok-4", messages: [{ role: "user", content: q }] })
+  });
+  const data = await res.json();
+  if (!res.ok) throw new Error(data.error?.message || res.statusText);
+  return { text: data.choices?.[0]?.message?.content || "" };
+}
+function showErr(id, err) {
+  const msg = /failed to fetch|network|cors/i.test(String(err)) ? "Browser blocked the call (CORS). Paste that model’s reply into the box." : String(err.message || err);
+  document.getElementById(id).textContent = msg;
+}
+document.getElementById("ask").onclick = async () => {
+  saveKeys();
+  const q = document.getElementById("q").value.trim();
+  if (!q) return;
+  ["gptErr","claudeErr","grokErr"].forEach(id => document.getElementById(id).textContent = "");
+  const jobs = [
+    ["gpt", askOpenAI],
+    ["claude", askClaude],
+    ["grok", askGrok]
+  ];
+  await Promise.all(jobs.map(async ([id, fn]) => {
+    document.getElementById(id).value = "Asking…";
+    try {
+      const result = await fn(q);
+      if (result.error) { document.getElementById(id).value = ""; showErr(id + "Err", result.error); }
+      else document.getElementById(id).value = result.text;
+    } catch (err) {
+      document.getElementById(id).value = "";
+      showErr(id + "Err", err);
+    }
+  }));
+  combine();
+};
+document.getElementById("combine").onclick = combine;
+</script>
+</body>
+</html>
