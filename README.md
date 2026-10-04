@@ -17,14 +17,16 @@ Now an installable iPhone web app (PWA): dark neon-red matrix theme, swipeable F
 - **Score replies**: first reply +1, most words +3, your Best pick +2 (kept in localStorage)
 - **Speak thread**, **Copy**, **Download / Share .md** (iOS share sheet → Save to Files / Google Drive), **Email thread**
 - **Library** of past questions (searchable, last 50)
-- API keys and model ids live only in this browser (defaults `gpt-4.1`, `claude-sonnet-4-6`, `grok-4`)
+- **Access code (shared use):** friends enter a code on the first-run welcome screen, or open a share link like `https://joshuameyer113geo.github.io/moirai/?code=XYZ`. Their questions go through the Moirai server (`server/`, a Cloudflare Worker that holds the API keys, checks codes, and enforces a daily limit per code). They don't need any API keys.
+- **Own API keys (optional):** Settings → *Own API keys*. These live only in this browser and call each provider directly (defaults `gpt-4.1`, `claude-sonnet-4-6`, `grok-4`)
 
 ## Files
 
 ```
-index.html             the whole app (no dependencies)
+index.html             the whole app (no dependencies); SERVER_URL constant near the top of the script
+server/                Cloudflare Worker for shared access (see server/README.md for deploy steps)
 manifest.webmanifest   PWA manifest
-sw.js                  service worker (offline app shell; never caches API calls)
+sw.js                  service worker (offline app shell; never caches API calls or /ask)
 icon.svg               default app mark (Neon Cauldron)
 icons/<variant>/       per-icon SVGs + 192/512 PNGs, maskable 192/512, apple-touch-icon 180, favicon
                        variants: neon-cauldron (default), thread-weavers, arcane, classic
