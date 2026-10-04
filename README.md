@@ -6,10 +6,10 @@ One question to ChatGPT, Claude, and Grok, then the thread they share.
 - Lachesis measures: Claude
 - Atropos cuts: Grok
 
-Open `index.html` in a browser. API keys stay in that browser and are sent only to the provider you call. If the browser blocks the request, paste that model's reply and use Combine.
+Open `index.html`. Keys stay in the browser. If a call is blocked, paste that reply and weave.
 
-This does not merge the models. Agreement is the safer core. A point only one model makes is a lead to check, not a fact.
+The page can copy the thread, download a Markdown note, and keep the last twelve threads in this browser.
 
-`icon.svg` is the app mark: a spindle, a measuring rod, and shears inside a Greek key border.
+Agreement is the safer core. A point only one model makes is a lead to check, not a fact.
 
-To publish the page: repository Settings, Pages, deploy from branch `main`, folder `/` (root).
+To publish: Settings, Pages, deploy from branch `main`, folder `/` (root).
