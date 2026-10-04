@@ -6,8 +6,10 @@ One question to ChatGPT, Claude, and Grok, then the thread they share.
 - Lachesis measures: Claude
 - Atropos cuts: Grok
 
-Open index.html. Listen fills the question from the microphone. Speak thread reads the woven reply aloud. Each panel can also be spoken. Stop ends both.
+Open `index.html`. This file is the full app: suggested questions, weave, copy, download, kept threads, listen, and speak.
 
-Listening needs a browser that supports speech recognition, and permission for the microphone. On iPhone, open the page in Safari.
+Keys stay in the browser. If a call is blocked, paste that reply and weave. On iPhone, open the page in Safari so the microphone works.
 
-Keys stay in the browser. Agreement is the safer core.
+`icon.svg` is the app mark: spindle, measuring rod, and shears inside a Greek key border.
+
+Agreement is the safer core. A point only one model makes is a lead to check, not a fact.
