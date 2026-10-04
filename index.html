@@ -4,81 +4,507 @@
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
 <title>Moirai</title>
-<link rel="icon" href="icon.svg" type="image/svg+xml" />
-<meta name="description" content="Moirai asks ChatGPT, Claude, and Grok, then shows the thread they share." />
-<meta name="theme-color" content="#f4f0e8" />
+<meta name="description" content="Moirai asks ChatGPT, Claude, and Grok, then weaves the thread they share." />
+<meta name="theme-color" content="#070102" />
+<meta name="color-scheme" content="dark" />
+<meta name="apple-mobile-web-app-capable" content="yes" />
+<meta name="mobile-web-app-capable" content="yes" />
+<meta name="apple-mobile-web-app-title" content="Moirai" />
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent" />
+<meta name="format-detection" content="telephone=no" />
+<link rel="manifest" href="manifest.webmanifest" />
+<link rel="icon" id="favSvg" href="icons/neon-cauldron/icon.svg" type="image/svg+xml" />
+<link rel="icon" id="favPng" href="icons/neon-cauldron/favicon-32.png" sizes="32x32" type="image/png" />
+<link rel="apple-touch-icon" id="touchIcon" href="icons/neon-cauldron/apple-touch-icon.png" />
+<script>
+/* Apply the chosen app icon before first paint so Safari's Add to Home Screen picks it up. */
+(function(){ var V=["neon-cauldron","thread-weavers","arcane","classic"], v="neon-cauldron";
+  try{ var s=JSON.parse(localStorage.getItem("moirai-icon")); if(V.indexOf(s)>=0) v=s; }catch(e){}
+  var b="icons/"+v+"/"; document.getElementById("favSvg").href=b+"icon.svg"; document.getElementById("favPng").href=b+"favicon-32.png"; document.getElementById("touchIcon").href=b+"apple-touch-icon.png";
+  window.__moiraiIcon=v; })();
+</script>
+<link rel="preload" href="fonts/ShareTechMono-Regular.woff2" as="font" type="font/woff2" crossorigin />
 <style>
-  :root { --bg:#f4f0e8; --panel:#fffcf7; --line:#e3dccf; --text:#1d1a16; --muted:#6f675c; --accent:#1e3f73; --gold:#8a7344; }
-  * { box-sizing: border-box; }
-  body { margin: 0; background: var(--bg); color: var(--text); font: 15px/1.5 Georgia, serif; }
-  button, input, textarea { font: 14px/1.4 -apple-system, BlinkMacSystemFont, sans-serif; }
-  header, main { max-width: 980px; margin: 0 auto; }
-  header { padding: 22px 16px 6px; }
-  h1 { margin: 0; font-size: 28px; }
-  .lead, .note { color: var(--muted); font-size: 13px; font-family: -apple-system, BlinkMacSystemFont, sans-serif; }
-  main { padding: 0 16px 56px; }
-  .card { background: var(--panel); border: 1px solid var(--line); border-radius: 18px; padding: 16px; margin-bottom: 12px; }
-  textarea, input { width: 100%; background: #faf7f1; color: var(--text); border: 1px solid var(--line); border-radius: 12px; padding: 11px 12px; }
-  textarea { min-height: 96px; }
-  .row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 10px; }
-  button { border: 1px solid var(--line); background: #fff; color: var(--text); border-radius: 999px; padding: 8px 13px; }
-  button.primary { background: var(--accent); color: #fff; border-color: var(--accent); }
-  .grid { display: grid; gap: 10px; }
-  @media (min-width: 840px) { .grid { grid-template-columns: 1fr 1fr 1fr; } }
-  .head { display: flex; justify-content: space-between; align-items: center; gap: 8px; }
-  .kicker { font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
-  .out { white-space: pre-wrap; min-height: 72px; }
-  .err { color: #8d3b32; font-size: 12px; }
+@font-face{font-family:"Share Tech Mono";font-style:normal;font-weight:400;font-display:swap;src:url(fonts/ShareTechMono-Regular.woff2) format("woff2")}
+:root{
+  --bg:#070102; --bg2:#12030600; --panel:rgba(22,3,7,.78); --panel-solid:#160307;
+  --line:rgba(255,42,61,.22); --line-hi:rgba(255,42,61,.55);
+  --red:#ff2a3d; --red-hi:#ff6b78; --red-lo:#c3001b; --text:#ffd9dc; --muted:#b0737a; --dim:#6d3a40;
+  --ok:#ff9aa4; --glow:0 0 12px rgba(255,42,61,.45);
+  --sat:env(safe-area-inset-top); --sab:env(safe-area-inset-bottom); --sal:env(safe-area-inset-left); --sar:env(safe-area-inset-right);
+  --bar-h:76px; --r:16px;
+  --font:"Share Tech Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box;-webkit-tap-highlight-color:transparent}
+html{background:var(--bg);-webkit-text-size-adjust:100%;text-size-adjust:100%}
+body{margin:0;min-height:100dvh;color:var(--text);font:16px/1.5 var(--font);background:radial-gradient(120% 70% at 50% 0%,#24040a 0%,var(--bg) 60%);overscroll-behavior-y:none}
+#rain{position:fixed;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;opacity:.55;transition:opacity .6s}
+body.rain-dim #rain{opacity:.2} body.rain-off #rain{display:none}
+.app{position:relative;z-index:1;max-width:1180px;margin:0 auto;padding:0 calc(var(--sar) + 14px) calc(var(--bar-h) + var(--sab) + 24px) calc(var(--sal) + 14px)}
+button,input,textarea,select{font:inherit;color:inherit}
+button{cursor:pointer;touch-action:manipulation}
+.sr{position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)}
+
+/* header */
+header{display:flex;align-items:center;gap:10px;height:calc(var(--sat) + 66px);padding:calc(var(--sat) + 8px) 0 10px;position:sticky;top:0;z-index:5}
+header::before{content:"";position:absolute;inset:0 calc(-14px - var(--sar)) -6px calc(-14px - var(--sal));background:linear-gradient(var(--bg) 80%,rgba(7,1,2,0));z-index:-1}
+header + .card{margin-top:6px}
+.logo{width:40px;height:40px;border-radius:11px;box-shadow:var(--glow);flex:none}
+.brand{flex:1;min-width:0}
+h1{margin:0;font-size:24px;line-height:1.15;letter-spacing:.32em;color:var(--red);text-shadow:0 0 8px rgba(255,42,61,.8),0 0 22px rgba(255,42,61,.35);font-weight:400}
+.tag{margin:0;font-size:12px;color:var(--muted);letter-spacing:.08em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.icon-btn{width:44px;height:44px;border-radius:12px;border:1px solid var(--line);background:rgba(22,3,7,.7);display:grid;place-items:center;flex:none}
+.icon-btn svg{width:22px;height:22px;stroke:var(--red-hi);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+
+/* cards */
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--r);padding:14px;margin-bottom:14px;-webkit-backdrop-filter:blur(6px);backdrop-filter:blur(6px)}
+.kicker{font-size:12px;letter-spacing:.18em;text-transform:uppercase;color:var(--red)}
+.muted{color:var(--muted)}
+textarea,input[type=text],input[type=password],input[type=search]{width:100%;font-size:16px;background:rgba(5,0,1,.75);border:1px solid var(--line);border-radius:12px;padding:12px;color:var(--text);outline:none;transition:border-color .2s,box-shadow .2s;-webkit-appearance:none;appearance:none}
+textarea:focus,input:focus{border-color:var(--red);box-shadow:var(--glow)}
+::placeholder{color:var(--dim)}
+#q{min-height:96px;resize:vertical;font-size:17px}
+.q-meta{display:flex;justify-content:space-between;align-items:center;margin-top:6px;font-size:12px;color:var(--muted)}
+.chips{display:flex;gap:8px;overflow-x:auto;padding:10px 2px 2px;margin:0 -2px;scrollbar-width:none;-webkit-overflow-scrolling:touch;scroll-snap-type:x proximity}
+.chips::-webkit-scrollbar{display:none}
+.chip{flex:none;min-height:40px;padding:8px 14px;border-radius:999px;border:1px solid var(--line);background:rgba(255,42,61,.06);font-size:14px;color:var(--red-hi);scroll-snap-align:start;white-space:nowrap}
+.btn{min-height:44px;padding:10px 16px;border-radius:12px;border:1px solid var(--line-hi);background:rgba(255,42,61,.08);color:var(--text);font-size:15px;letter-spacing:.04em;transition:transform .12s,background .2s,box-shadow .2s}
+.btn.sm{min-height:44px;padding:8px 12px;font-size:14px}
+.btn.primary{background:linear-gradient(180deg,#ff3a4c,#c3001b);border-color:#ff6b78;color:#fff;box-shadow:0 0 18px rgba(255,42,61,.45);text-shadow:0 1px 0 rgba(0,0,0,.3)}
+.btn.ghost{background:transparent;border-color:var(--line)}
+.btn:disabled{opacity:.45}
+.press{transform:scale(.94)!important;filter:brightness(1.25)}
+.link{background:none;border:0;color:var(--red-hi);min-height:44px;padding:0 6px;font-size:14px;text-decoration:underline;text-underline-offset:3px}
+
+/* tabs + panels */
+.tabs{display:grid;grid-template-columns:repeat(3,1fr);gap:6px;margin:0 0 10px;position:sticky;top:calc(var(--sat) + 70px);z-index:4}
+.tab{min-height:52px;border-radius:12px;border:1px solid var(--line);background:rgba(15,2,5,.85);padding:6px 4px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;transition:all .2s;-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px)}
+.tab b{font-weight:400;font-size:15px;letter-spacing:.05em}
+.tab small{font-size:11px;color:var(--muted);display:flex;gap:6px;align-items:center}
+.tab[aria-selected=true]{border-color:var(--red);background:rgba(255,42,61,.14);box-shadow:var(--glow);color:#fff}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--dim)}
+.dot.has{background:var(--red)} .dot.busy{background:var(--red-hi);animation:pulse 1s infinite} .dot.err{background:#ffb000}
+@keyframes pulse{50%{opacity:.25;transform:scale(1.6)}}
+.track{display:flex;overflow-x:auto;scroll-snap-type:x mandatory;gap:14px;scrollbar-width:none;margin:0 -14px;padding:0 14px;scroll-padding:0 14px;-webkit-overflow-scrolling:touch}
+.track::-webkit-scrollbar{display:none}
+.panel{flex:0 0 100%;scroll-snap-align:center;scroll-snap-stop:always;margin-bottom:14px;display:flex;flex-direction:column;position:relative;overflow:hidden}
+.panel.best{border-color:var(--red);box-shadow:0 0 0 1px var(--red),0 0 26px rgba(255,42,61,.35)}
+.panel-head{display:flex;justify-content:space-between;align-items:flex-start;gap:8px;margin-bottom:8px}
+.panel-head h2{margin:2px 0 0;font-size:20px;font-weight:400;letter-spacing:.06em}
+.model-id{font-size:12px;color:var(--muted)}
+.crown{font-size:12px;color:#fff;background:var(--red-lo);border-radius:999px;padding:3px 9px;display:none;box-shadow:var(--glow)}
+.panel.best .crown{display:inline-block}
+.body{position:relative}
+.reply{min-height:38vh;resize:vertical;font-size:16px;line-height:1.55}
+@media (min-width:900px){.reply{min-height:340px}}
+.typing{position:absolute;inset:0;border-radius:12px;background:rgba(5,0,1,.92);border:1px solid var(--red);padding:14px;display:none;flex-direction:column;gap:10px;box-shadow:inset 0 0 30px rgba(255,42,61,.15)}
+.panel.busy .typing{display:flex}
+.typing .who{color:var(--red-hi);font-size:14px;display:flex;align-items:center;gap:8px}
+.dots span{display:inline-block;width:6px;height:6px;margin:0 2px;border-radius:50%;background:var(--red);animation:blink 1.2s infinite}
+.dots span:nth-child(2){animation-delay:.2s}.dots span:nth-child(3){animation-delay:.4s}
+@keyframes blink{0%,80%,100%{opacity:.2;transform:translateY(0)}40%{opacity:1;transform:translateY(-4px)}}
+.shim{height:12px;border-radius:6px;background:linear-gradient(90deg,rgba(255,42,61,.08) 0%,rgba(255,42,61,.35) 50%,rgba(255,42,61,.08) 100%);background-size:200% 100%;animation:shim 1.4s linear infinite}
+@keyframes shim{to{background-position:-200% 0}}
+.panel-foot{display:flex;align-items:center;gap:8px;margin-top:10px;flex-wrap:wrap}
+.panel-foot .wc{margin-right:auto;font-size:13px;color:var(--muted)}
+.err{color:#ffb000;font-size:13px;margin-top:6px;min-height:0}
+.err:empty{display:none}
+details.crit{margin-top:10px;border-top:1px dashed var(--line);padding-top:8px}
+details.crit summary{min-height:44px;display:flex;align-items:center;color:var(--red-hi);cursor:pointer;font-size:14px;letter-spacing:.06em}
+.crit-body{white-space:pre-wrap;font-size:14px;color:var(--text);max-height:40vh;overflow:auto}
+@media (min-width:900px){
+  .tabs{display:none}
+  .track{display:grid;grid-template-columns:repeat(3,1fr);overflow:visible;margin:0;padding:0}
+  .panel{margin-bottom:14px}
+}
+
+/* thread */
+.thread h3{margin:14px 0 8px;font-size:13px;letter-spacing:.16em;text-transform:uppercase;color:var(--red-hi);font-weight:400}
+.thread ul{list-style:none;margin:0;padding:0;display:grid;gap:8px}
+.thread li{padding:10px 12px;border-radius:12px;background:rgba(5,0,1,.6);border-left:3px solid var(--red);animation:rise .35s both}
+.thread li.solo{border-left-color:var(--dim)}
+.pill{display:inline-block;font-size:11px;padding:2px 8px;margin:6px 6px 0 0;border-radius:999px;border:1px solid var(--line-hi);color:var(--red-hi)}
+.empty{color:var(--muted);font-size:14px}
+@keyframes rise{from{opacity:0;transform:translateY(8px)}}
+.score-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px;margin-top:10px}
+.score{text-align:center;padding:10px 4px;border-radius:12px;background:rgba(5,0,1,.6);border:1px solid var(--line)}
+.score b{display:block;font-size:26px;font-weight:400;color:var(--red);text-shadow:var(--glow)}
+.score small{color:var(--muted);font-size:12px}
+.score.lead{border-color:var(--red)}
+.foot-note{font-size:12px;color:var(--dim);text-align:center;margin:10px 0}
+
+/* bottom bar */
+.bar{position:fixed;left:0;right:0;bottom:0;z-index:20;padding:10px calc(var(--sar) + 12px) calc(var(--sab) + 10px) calc(var(--sal) + 12px);background:linear-gradient(180deg,rgba(7,1,2,0) 0%,rgba(7,1,2,.92) 28%,#070102 100%)}
+.bar-in{max-width:640px;margin:0 auto;display:grid;grid-template-columns:54px 1.5fr 1fr 54px;gap:8px;align-items:center}
+.bar .btn{min-height:54px;padding:6px 8px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;font-size:13px;border-radius:14px;background:rgba(22,3,7,.95)}
+.bar .btn.primary{font-size:15px;white-space:nowrap;letter-spacing:.02em;background:linear-gradient(180deg,#ff3a4c,#c3001b)}
+.bar .btn svg{width:22px;height:22px;stroke:currentColor;fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round}
+#listen.on{border-color:var(--red);color:#fff;box-shadow:0 0 0 0 rgba(255,42,61,.7);animation:ring 1.4s infinite}
+@keyframes ring{70%{box-shadow:0 0 0 14px rgba(255,42,61,0)}100%{box-shadow:0 0 0 0 rgba(255,42,61,0)}}
+
+/* sheets */
+.scrim{position:fixed;inset:0;z-index:40;background:rgba(0,0,0,.6);opacity:0;pointer-events:none;transition:opacity .25s}
+.scrim.open{opacity:1;pointer-events:auto}
+.sheet{position:fixed;left:0;right:0;bottom:0;z-index:50;max-width:640px;margin:0 auto;max-height:88dvh;display:flex;flex-direction:column;background:#110205;border:1px solid var(--line-hi);border-bottom:0;border-radius:22px 22px 0 0;box-shadow:0 -10px 40px rgba(255,42,61,.18);transform:translateY(105%);transition:transform .32s cubic-bezier(.2,.9,.2,1);padding:0 calc(var(--sar) + 16px) calc(var(--sab) + 16px) calc(var(--sal) + 16px);visibility:hidden}
+.sheet.open{transform:none;visibility:visible}
+.grab{padding:10px 0 4px;display:flex;justify-content:center;touch-action:none;cursor:grab}
+.grab i{width:42px;height:5px;border-radius:3px;background:var(--dim)}
+.sheet-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:8px}
+.sheet-head h2{margin:0;font-size:18px;font-weight:400;letter-spacing:.2em;color:var(--red)}
+.sheet-body{overflow:auto;-webkit-overflow-scrolling:touch;overscroll-behavior:contain;padding-bottom:4px}
+.field{display:block;margin:0 0 12px}
+.field span{display:block;font-size:12px;color:var(--muted);letter-spacing:.1em;margin-bottom:4px;text-transform:uppercase}
+.group{border:1px solid var(--line);border-radius:14px;padding:12px;margin-bottom:12px}
+.group legend{padding:0 6px;color:var(--red-hi);font-size:13px;letter-spacing:.12em}
+.seg{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
+.seg button{min-height:44px;border-radius:10px;border:1px solid var(--line);background:transparent}
+.seg button[aria-pressed=true]{border-color:var(--red);background:rgba(255,42,61,.15);color:#fff}
+.icon-pick{display:grid;grid-template-columns:repeat(4,1fr);gap:8px}
+.icon-pick button{display:flex;flex-direction:column;align-items:center;gap:6px;padding:8px 2px 6px;min-height:44px;border-radius:14px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:11px;letter-spacing:.04em;line-height:1.2;transition:border-color .2s,background .2s,box-shadow .2s}
+.icon-pick img{width:56px;height:56px;border-radius:13px;display:block;transition:transform .15s}
+.icon-pick button:active img{transform:scale(.94)}
+.icon-pick button[aria-checked=true]{border-color:var(--red);background:rgba(255,42,61,.13);color:#fff;box-shadow:var(--glow)}
+.icon-note{font-size:12px;margin:10px 0 0}
+.actions{display:grid;grid-template-columns:repeat(2,1fr);gap:8px}
+.actions .btn{display:flex;align-items:center;gap:10px;justify-content:flex-start;text-align:left;min-height:56px}
+.actions .btn svg{width:22px;height:22px;stroke:var(--red-hi);fill:none;stroke-width:1.8;stroke-linecap:round;stroke-linejoin:round;flex:none}
+.lib-list{list-style:none;margin:10px 0 0;padding:0;display:grid;gap:8px}
+.lib-item{display:flex;gap:8px;align-items:stretch}
+.lib-open{flex:1;text-align:left;min-height:56px;border-radius:12px;border:1px solid var(--line);background:rgba(5,0,1,.6);padding:10px 12px}
+.lib-open b{display:block;font-weight:400;overflow:hidden;text-overflow:ellipsis;display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical}
+.lib-open small{color:var(--muted);font-size:12px}
+.lib-del{width:48px;border-radius:12px;border:1px solid var(--line);background:transparent;color:var(--muted);font-size:18px}
+.toast{position:fixed;left:50%;bottom:calc(var(--bar-h) + var(--sab) + 18px);transform:translate(-50%,20px);z-index:60;background:#1d0409;border:1px solid var(--red);color:#fff;padding:10px 16px;border-radius:12px;box-shadow:var(--glow);opacity:0;pointer-events:none;transition:all .25s;font-size:14px;max-width:88vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+h1 .g{display:inline-block;animation:flick 6s infinite}
+@keyframes flick{0%,92%,100%{opacity:1}93%{opacity:.3}94%{opacity:1}96%{opacity:.5}}
+@media (prefers-reduced-motion:reduce){
+  *,*::before,*::after{animation-duration:.001ms!important;animation-iteration-count:1!important;transition-duration:.001ms!important;scroll-behavior:auto!important}
+  #rain{opacity:.15}
+  .shim{background:rgba(255,42,61,.18)}
+}
 </style>
 </head>
 <body>
-<header><h1>Moirai</h1><p class="lead">Ask one Fate, or all three.</p></header>
-<main>
-  <section class="card">
-    <textarea id="q" placeholder="Ask one clear question."></textarea>
-    <div class="row">
-      <button class="primary" id="ask">Ask all three</button>
-      <button id="listen">Listen</button>
-      <button id="speak">Speak thread</button>
-      <button id="stopVoice">Stop</button>
-      <button id="combine">Weave the thread</button>
-    </div>
-    <p class="note">Each panel has its own Ask button. Keys stay in this browser.</p>
-    <details><summary>Keys</summary>
-      <input id="openaiKey" type="password" placeholder="OpenAI key" />
-      <input id="openaiModel" value="gpt-4.1" />
-      <input id="anthropicKey" type="password" placeholder="Anthropic key" />
-      <input id="claudeModel" value="claude-sonnet-4-6" />
-      <input id="xaiKey" type="password" placeholder="xAI key" />
-      <input id="grokModel" value="grok-4" />
-    </details>
+<canvas id="rain" aria-hidden="true"></canvas>
+<div class="app">
+  <header>
+    <img class="logo" id="logo" src="icons/neon-cauldron/icon-192.png" alt="" width="40" height="40" />
+    <div class="brand"><h1><span class="g">MOIRAI</span></h1><p class="tag">ask one fate · or all three</p></div>
+    <button class="icon-btn" id="openLibrary" aria-label="Library of past questions"><svg viewBox="0 0 24 24"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 5l3.5-1 3 15.5-3.5 1z"/></svg></button>
+    <button class="icon-btn" id="openSettings" aria-label="Settings and API keys"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.7 1.7 0 0 0 .3 1.8l.1.1a2 2 0 1 1-2.8 2.8l-.1-.1a1.7 1.7 0 0 0-1.8-.3 1.7 1.7 0 0 0-1 1.5V21a2 2 0 1 1-4 0v-.1a1.7 1.7 0 0 0-1.1-1.5 1.7 1.7 0 0 0-1.8.3l-.1.1a2 2 0 1 1-2.8-2.8l.1-.1a1.7 1.7 0 0 0 .3-1.8 1.7 1.7 0 0 0-1.5-1H3a2 2 0 1 1 0-4h.1a1.7 1.7 0 0 0 1.5-1.1 1.7 1.7 0 0 0-.3-1.8l-.1-.1a2 2 0 1 1 2.8-2.8l.1.1a1.7 1.7 0 0 0 1.8.3H9a1.7 1.7 0 0 0 1-1.5V3a2 2 0 1 1 4 0v.1a1.7 1.7 0 0 0 1 1.5 1.7 1.7 0 0 0 1.8-.3l.1-.1a2 2 0 1 1 2.8 2.8l-.1.1a1.7 1.7 0 0 0-.3 1.8V9a1.7 1.7 0 0 0 1.5 1H21a2 2 0 1 1 0 4h-.1a1.7 1.7 0 0 0-1.5 1z"/></svg></button>
+  </header>
+
+  <section class="card" aria-label="Question">
+    <label for="q" class="sr">Your question</label>
+    <textarea id="q" placeholder="&gt; ask one clear question_" enterkeyhint="send" autocapitalize="sentences"></textarea>
+    <div class="q-meta"><span id="qCount">0 words</span><button class="link" id="clearQ" type="button">clear</button></div>
+    <div class="chips" id="chips" role="list" aria-label="Prompt ideas"></div>
   </section>
-  <section class="grid">
-    <article class="card"><div class="head"><div class="kicker">Clotho · ChatGPT</div><span><button data-ask="gpt">Ask</button> <button data-speak="gpt">Speak</button></span></div><textarea id="gpt"></textarea><div class="err" id="gptErr"></div></article>
-    <article class="card"><div class="head"><div class="kicker">Lachesis · Claude</div><span><button data-ask="claude">Ask</button> <button data-speak="claude">Speak</button></span></div><textarea id="claude"></textarea><div class="err" id="claudeErr"></div></article>
-    <article class="card"><div class="head"><div class="kicker">Atropos · Grok</div><span><button data-ask="grok">Ask</button> <button data-speak="grok">Speak</button></span></div><textarea id="grok"></textarea><div class="err" id="grokErr"></div></article>
+
+  <nav class="tabs" role="tablist" aria-label="The three Fates" id="tabs"></nav>
+  <section class="track" id="track" aria-live="polite"></section>
+
+  <section class="card thread" aria-label="The thread">
+    <div class="kicker">The thread</div>
+    <div id="synthesis"><p class="empty">Ask one, or all three, then weave. Pasted replies work too.</p></div>
   </section>
-  <section class="card"><div class="kicker">The thread</div><div class="out" id="synthesis">Ask one, or all three, then weave.</div></section>
-</main>
+
+  <section class="card" aria-label="Scoreboard">
+    <div style="display:flex;justify-content:space-between;align-items:center"><div class="kicker">Scoreboard</div><button class="btn sm ghost" id="scoreBtn2">Score replies</button></div>
+    <div class="score-grid" id="scores"></div>
+    <p class="muted" style="font-size:12px;margin:8px 0 0">First reply +1 · most words +3 · your Best pick +2</p>
+  </section>
+  <p class="foot-note">Agreement is the safer core. A point only one model makes is a lead to check, not a fact. Keys stay in this browser.</p>
+</div>
+
+<div class="bar" role="toolbar" aria-label="Primary actions">
+  <div class="bar-in">
+    <button class="btn" id="listen" aria-pressed="false" aria-label="Listen"><svg viewBox="0 0 24 24"><rect x="9" y="3" width="6" height="11" rx="3"/><path d="M5 11a7 7 0 0 0 14 0M12 18v3"/></svg></button>
+    <button class="btn primary" id="ask">Ask all three</button>
+    <button class="btn" id="combine">Weave</button>
+    <button class="btn" id="openMore" aria-label="More actions"><svg viewBox="0 0 24 24"><circle cx="5" cy="12" r="1.3"/><circle cx="12" cy="12" r="1.3"/><circle cx="19" cy="12" r="1.3"/></svg></button>
+  </div>
+</div>
+
+<div class="scrim" id="scrim"></div>
+
+<section class="sheet" id="moreSheet" role="dialog" aria-modal="true" aria-label="More actions">
+  <div class="grab"><i></i></div>
+  <div class="sheet-head"><h2>ACTIONS</h2><button class="link" data-close>done</button></div>
+  <div class="sheet-body"><div class="actions">
+    <button class="btn" id="speak"><svg viewBox="0 0 24 24"><path d="M4 9v6h4l5 4V5L8 9zM16 8a5 5 0 0 1 0 8M19 5a9 9 0 0 1 0 14"/></svg>Speak thread</button>
+    <button class="btn" id="stopVoice"><svg viewBox="0 0 24 24"><rect x="6" y="6" width="12" height="12" rx="2"/></svg>Stop voice</button>
+    <button class="btn" id="checkBtn"><svg viewBox="0 0 24 24"><path d="M4 12l5 5L20 6"/></svg>Check each other</button>
+    <button class="btn" id="scoreBtn"><svg viewBox="0 0 24 24"><path d="M12 3l2.7 5.6 6.1.9-4.4 4.3 1 6.1L12 17l-5.4 2.9 1-6.1L3.2 9.5l6.1-.9z"/></svg>Score replies</button>
+    <button class="btn" id="copyBtn"><svg viewBox="0 0 24 24"><rect x="9" y="9" width="11" height="11" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h8"/></svg>Copy thread</button>
+    <button class="btn" id="downloadBtn"><svg viewBox="0 0 24 24"><path d="M12 3v12M7 10l5 5 5-5M5 21h14"/></svg>Download / Share .md</button>
+    <button class="btn" id="emailBtn"><svg viewBox="0 0 24 24"><rect x="3" y="5" width="18" height="14" rx="2"/><path d="M3 7l9 6 9-6"/></svg>Email thread</button>
+    <button class="btn" id="saveBtn"><svg viewBox="0 0 24 24"><path d="M6 3h12v18l-6-4-6 4z"/></svg>Keep in library</button>
+    <button class="btn" id="newBtn"><svg viewBox="0 0 24 24"><path d="M12 5v14M5 12h14"/></svg>New question</button>
+    <button class="btn" id="libBtn2"><svg viewBox="0 0 24 24"><path d="M4 4h4v16H4zM10 4h4v16h-4zM16 5l3.5-1 3 15.5-3.5 1z"/></svg>Library</button>
+  </div></div>
+</section>
+
+<section class="sheet" id="librarySheet" role="dialog" aria-modal="true" aria-label="Library">
+  <div class="grab"><i></i></div>
+  <div class="sheet-head"><h2>LIBRARY</h2><button class="link" data-close>done</button></div>
+  <label class="sr" for="libSearch">Search library</label>
+  <input type="search" id="libSearch" placeholder="search past questions…" autocomplete="off" />
+  <div class="sheet-body"><ul class="lib-list" id="libraryList"></ul></div>
+</section>
+
+<section class="sheet" id="settingsSheet" role="dialog" aria-modal="true" aria-label="Settings">
+  <div class="grab"><i></i></div>
+  <div class="sheet-head"><h2>SETTINGS</h2><button class="link" data-close>done</button></div>
+  <div class="sheet-body">
+    <fieldset class="group"><legend>Clotho · ChatGPT</legend>
+      <label class="field"><span>OpenAI key</span><input id="openaiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-…" /></label>
+      <label class="field"><span>Model</span><input id="openaiModel" type="text" autocapitalize="off" spellcheck="false" placeholder="gpt-4.1" /></label>
+    </fieldset>
+    <fieldset class="group"><legend>Lachesis · Claude</legend>
+      <label class="field"><span>Anthropic key</span><input id="anthropicKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="sk-ant-…" /></label>
+      <label class="field"><span>Model</span><input id="claudeModel" type="text" autocapitalize="off" spellcheck="false" placeholder="claude-sonnet-4-6" /></label>
+    </fieldset>
+    <fieldset class="group"><legend>Atropos · Grok</legend>
+      <label class="field"><span>xAI key</span><input id="xaiKey" type="password" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="xai-…" /></label>
+      <label class="field"><span>Model</span><input id="grokModel" type="text" autocapitalize="off" spellcheck="false" placeholder="grok-4" /></label>
+    </fieldset>
+    <fieldset class="group"><legend>App icon</legend>
+      <div class="icon-pick" id="iconPick" role="radiogroup" aria-label="App icon"></div>
+      <p class="muted icon-note">iPhone sets the home-screen icon when you tap Add to Home Screen. Pick one first; to change later, remove the app and add it again.</p>
+    </fieldset>
+    <fieldset class="group"><legend>Matrix rain</legend>
+      <div class="seg" id="rainSeg"><button data-rain="on">On</button><button data-rain="dim">Dim</button><button data-rain="off">Off</button></div>
+    </fieldset>
+    <fieldset class="group"><legend>Data</legend>
+      <div style="display:flex;gap:8px;flex-wrap:wrap"><button class="btn sm ghost" id="resetScores">Reset scores</button><button class="btn sm ghost" id="clearLib">Clear library</button></div>
+    </fieldset>
+    <p class="muted" style="font-size:12px">Keys and model ids are stored only in this browser (localStorage) and sent straight to each provider. If a call is blocked, paste that reply into its panel and weave. On iPhone the mic works best in Safari.</p>
+  </div>
+</section>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
 <script>
-const KEY="moirai-keys";
-["openaiKey","openaiModel","anthropicKey","claudeModel","xaiKey","grokModel"].forEach(id=>{ const s=JSON.parse(localStorage.getItem(KEY)||"{}"); if(s[id]) document.getElementById(id).value=s[id]; document.getElementById(id).onchange=()=>{ const d={}; ["openaiKey","openaiModel","anthropicKey","claudeModel","xaiKey","grokModel"].forEach(k=>d[k]=document.getElementById(k).value.trim()); localStorage.setItem(KEY, JSON.stringify(d)); }; });
-function speak(text){ if(!window.speechSynthesis){ alert("This browser cannot speak."); return;} speechSynthesis.cancel(); const u=new SpeechSynthesisUtterance(String(text||"").slice(0,4000)); speechSynthesis.speak(u); }
-document.getElementById("speak").onclick=()=>speak(synthesis.textContent);
-document.getElementById("stopVoice").onclick=()=>{ speechSynthesis.cancel(); if(window._hear) window._hear.stop(); listen.textContent="Listen"; };
-document.querySelectorAll("[data-speak]").forEach(b=>b.onclick=()=>speak(document.getElementById(b.dataset.speak).value));
-document.getElementById("listen").onclick=()=>{ const Rec=window.SpeechRecognition||window.webkitSpeechRecognition; if(!Rec){ alert("This browser cannot listen. Open in Safari."); return;} if(window._hear && listen.textContent==="Listening"){ window._hear.stop(); return;} const hear=new Rec(); window._hear=hear; hear.lang="en-US"; hear.interimResults=true; hear.onresult=e=>{ q.value=[...e.results].map(r=>r[0].transcript).join(" "); }; hear.onend=()=>listen.textContent="Listen"; hear.onerror=()=>{ listen.textContent="Listen"; alert("Allow the microphone."); }; listen.textContent="Listening"; hear.start(); };
-function weave(){ const packs=[["ChatGPT",gpt.value],["Claude",claude.value],["Grok",grok.value]].filter(p=>p[1].trim()); synthesis.textContent = packs.length<2 ? "Need at least two replies." : packs.map(p=>p[0]+":\n"+p[1].trim().slice(0,600)).join("\n\n"); }
-document.getElementById("combine").onclick=weave;
-async function askOne(url, headers, body){ const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(body)}); const data=await res.json(); if(!res.ok) throw new Error(data.error&&data.error.message||res.statusText); return data; }
-function callers(question){ return {
-  gpt: () => openaiKey.value.trim() ? askOne("https://api.openai.com/v1/chat/completions", {Authorization:"Bearer "+openaiKey.value.trim(),"Content-Type":"application/json"}, {model:openaiModel.value||"gpt-4.1", messages:[{role:"user",content:question}]}).then(d=>d.choices[0].message.content) : Promise.reject(new Error("No OpenAI key.")),
-  claude: () => anthropicKey.value.trim() ? askOne("https://api.anthropic.com/v1/messages", {"x-api-key":anthropicKey.value.trim(),"anthropic-version":"2023-06-01","content-type":"application/json"}, {model:claudeModel.value||"claude-sonnet-4-6", max_tokens:1200, messages:[{role:"user",content:question}]}).then(d=>(d.content||[]).map(c=>c.text||"").join("\n")) : Promise.reject(new Error("No Anthropic key.")),
-  grok: () => xaiKey.value.trim() ? askOne("https://api.x.ai/v1/chat/completions", {Authorization:"Bearer "+xaiKey.value.trim(),"Content-Type":"application/json"}, {model:grokModel.value||"grok-4", messages:[{role:"user",content:question}]}).then(d=>d.choices[0].message.content) : Promise.reject(new Error("No xAI key."))
-}; }
-async function askIds(ids){ const question=q.value.trim(); if(!question) return; const jobs=callers(question); await Promise.all(ids.map(async id=>{ const box=document.getElementById(id); const prior=box.value; if(!prior) box.value="Asking…"; try { box.value=await jobs[id](); document.getElementById(id+"Err").textContent=""; } catch(err){ if(!prior) box.value=""; document.getElementById(id+"Err").textContent=/fetch|cors/i.test(String(err))?"Browser blocked the call. Paste the reply.":String(err.message||err);} })); if(ids.length>1) weave(); }
-document.getElementById("ask").onclick=()=>askIds(["gpt","claude","grok"]);
-document.querySelectorAll("[data-ask]").forEach(btn=>btn.onclick=()=>askIds([btn.dataset.ask]));
+"use strict";
+const $ = (s, r=document) => r.querySelector(s);
+const $$ = (s, r=document) => [...r.querySelectorAll(s)];
+const esc = s => String(s ?? "").replace(/[&<>"']/g, c => ({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[c]));
+// Build DOM without innerHTML for any user/model text.
+function h(tag, attrs={}, ...kids){ const el=document.createElement(tag); for(const [k,v] of Object.entries(attrs)){ if(k==="class") el.className=v; else if(k.startsWith("on")) el.addEventListener(k.slice(2),v); else el.setAttribute(k,v);} for(const k of kids.flat()){ if(k==null) continue; el.append(k instanceof Node?k:document.createTextNode(String(k))); } return el; }
+const store = { get(k,d){ try{ const v=localStorage.getItem(k); return v==null?d:JSON.parse(v);}catch{ return d; } }, set(k,v){ try{ localStorage.setItem(k,JSON.stringify(v)); }catch{} } };
+
+const FATES = [
+  {id:"gpt", fate:"Clotho", verb:"spins", name:"ChatGPT", keyId:"openaiKey", modelId:"openaiModel", def:"gpt-4.1"},
+  {id:"claude", fate:"Lachesis", verb:"measures", name:"Claude", keyId:"anthropicKey", modelId:"claudeModel", def:"claude-sonnet-4-6"},
+  {id:"grok", fate:"Atropos", verb:"cuts", name:"Grok", keyId:"xaiKey", modelId:"grokModel", def:"grok-4"},
+];
+const byId = Object.fromEntries(FATES.map(f=>[f.id,f]));
+const KEY="moirai-keys", LIB="moirai-library", SCORES="moirai-scores", PREFS="moirai-prefs";
+const SETTING_IDS=["openaiKey","openaiModel","anthropicKey","claudeModel","xaiKey","grokModel"];
+const state = { arrived:[], session:null, scoredSig:null, best:null, crit:{}, busy:new Set() };
+
+/* ---------- haptic-feel presses ---------- */
+document.addEventListener("pointerdown", e=>{ const b=e.target.closest("button"); if(!b||b.disabled) return; b.classList.add("press"); if(navigator.vibrate) try{navigator.vibrate(8);}catch{} });
+["pointerup","pointercancel","pointerleave"].forEach(t=>document.addEventListener(t, ()=>$$(".press").forEach(b=>b.classList.remove("press")), true));
+
+function toast(msg){ const t=$("#toast"); t.textContent=msg; t.classList.add("show"); clearTimeout(toast._t); toast._t=setTimeout(()=>t.classList.remove("show"),2200); }
+
+/* ---------- build panels + tabs ---------- */
+const tabs=$("#tabs"), track=$("#track");
+FATES.forEach((f,i)=>{
+  tabs.append(h("button",{class:"tab",role:"tab",id:"tab-"+f.id,"aria-controls":"panel-"+f.id,"aria-selected":i===0?"true":"false",onclick:()=>goTo(i)},
+    h("b",{},f.name), h("small",{}, h("i",{class:"dot",id:f.id+"Dot"}), h("span",{id:f.id+"TabWc"},"0w"), h("span",{id:f.id+"TabScore"},"★0"))));
+  track.append(h("article",{class:"card panel",id:"panel-"+f.id,role:"tabpanel","aria-labelledby":"tab-"+f.id},
+    h("div",{class:"panel-head"},
+      h("div",{}, h("div",{class:"kicker"},`${f.fate} · ${f.verb}`), h("h2",{},f.name), h("div",{class:"model-id",id:f.id+"ModelLabel"},f.def)),
+      h("span",{class:"crown"},"★ BEST")),
+    h("div",{class:"body"},
+      h("textarea",{class:"reply",id:f.id,placeholder:`${f.fate}'s reply appears here — or paste one.`,"aria-label":f.name+" reply"}),
+      h("div",{class:"typing","aria-hidden":"true"},
+        h("div",{class:"who"}, `${f.fate} is ${f.verb==="cuts"?"cutting":f.verb==="spins"?"spinning":"measuring"}`, h("span",{class:"dots"},h("span"),h("span"),h("span"))),
+        h("div",{class:"shim",style:"width:92%"}),h("div",{class:"shim",style:"width:78%"}),h("div",{class:"shim",style:"width:86%"}),h("div",{class:"shim",style:"width:54%"}))),
+    h("div",{class:"panel-foot"},
+      h("span",{class:"wc",id:f.id+"Count"},"0 words"),
+      h("button",{class:"btn sm","data-ask":f.id},"Ask"),
+      h("button",{class:"btn sm ghost","data-best":f.id,"aria-pressed":"false"},"Best"),
+      h("button",{class:"btn sm ghost","data-speak":f.id},"Speak")),
+    h("div",{class:"err",id:f.id+"Err",role:"alert"}),
+    h("details",{class:"crit",id:f.id+"CritWrap",hidden:""}, h("summary",{},`${f.name} checks the others`), h("div",{class:"crit-body",id:f.id+"Crit"}))));
+});
+let curIdx=0;
+function goTo(i){ curIdx=i; const p=track.children[i]; track.scrollTo({left:i*(p.getBoundingClientRect().width+14), behavior: matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth"}); setTab(i); }
+function setTab(i){ $$(".tab").forEach((t,j)=>t.setAttribute("aria-selected", j===i?"true":"false")); }
+let scrollT; track.addEventListener("scroll", ()=>{ cancelAnimationFrame(scrollT); scrollT=requestAnimationFrame(()=>{ const w=track.children[0].getBoundingClientRect().width+14; const i=Math.round(track.scrollLeft/w); if(i!==curIdx && i>=0 && i<3){ curIdx=i; setTab(i);} }); }, {passive:true});
+
+/* ---------- word counts ---------- */
+const words = t => (String(t).trim().match(/\S+/g)||[]).length;
+function updateCounts(){ FATES.forEach(f=>{ const n=words($("#"+f.id).value); $("#"+f.id+"Count").textContent=n+(n===1?" word":" words"); $("#"+f.id+"TabWc").textContent=n+"w"; const d=$("#"+f.id+"Dot"); if(!state.busy.has(f.id)&&!d.classList.contains("err")) d.className="dot"+(n?" has":""); }); const qn=words($("#q").value); $("#qCount").textContent=qn+(qn===1?" word":" words"); }
+FATES.forEach(f=>$("#"+f.id).addEventListener("input", ()=>{ $("#"+f.id+"Dot").classList.remove("err"); updateCounts(); }));
+$("#q").addEventListener("input", updateCounts);
+$("#clearQ").onclick=()=>{ $("#q").value=""; updateCounts(); $("#q").focus(); };
+$("#q").addEventListener("keydown", e=>{ if(e.key==="Enter" && (e.metaKey||e.ctrlKey)){ e.preventDefault(); askIds(FATES.map(f=>f.id)); } });
+
+/* ---------- prompt chips ---------- */
+const CHIPS=[["Explain simply","Explain like I'm 12: "],["Pros & cons","What are the strongest arguments for and against "],["3 options","Give me three distinct options for "],["What am I missing?","What am I missing or getting wrong about "],["Fact-check","Fact-check this claim and rate your confidence: "],["Plan it","Make a short step-by-step plan to "],["Steelman","Steelman the view that "],["Predict","What is most likely to happen with "]];
+CHIPS.forEach(([label,text])=>$("#chips").append(h("button",{class:"chip",role:"listitem",type:"button",onclick:()=>{ const q=$("#q"); q.value=text+q.value.replace(/^\s+/,""); updateCounts(); q.focus(); q.setSelectionRange(q.value.length,q.value.length); }},label)));
+
+/* ---------- settings ---------- */
+const saved=store.get(KEY,{});
+SETTING_IDS.forEach(id=>{ const el=$("#"+id); el.value=saved[id]||""; el.addEventListener("input", saveSettings); });
+function saveSettings(){ const d={}; SETTING_IDS.forEach(k=>d[k]=$("#"+k).value.trim()); store.set(KEY,d); FATES.forEach(f=>$("#"+f.id+"ModelLabel").textContent=modelOf(f)); }
+const keyOf=f=>$("#"+f.keyId).value.trim(), modelOf=f=>$("#"+f.modelId).value.trim()||f.def;
+FATES.forEach(f=>$("#"+f.id+"ModelLabel").textContent=modelOf(f));
+
+/* ---------- sheets ---------- */
+const scrim=$("#scrim"); let openSheet=null, lastFocus=null;
+function showSheet(id){ if(openSheet) hideSheet(true); lastFocus=document.activeElement; openSheet=$("#"+id); openSheet.classList.add("open"); scrim.classList.add("open"); if(id==="librarySheet") renderLibrary(); setTimeout(()=>{ const c=$("[data-close]",openSheet); c&&c.focus({preventScroll:true}); },50); }
+function hideSheet(quick){ if(!openSheet) return; openSheet.style.transform=""; openSheet.classList.remove("open"); scrim.classList.remove("open"); openSheet=null; if(!quick && lastFocus && lastFocus.focus) lastFocus.focus({preventScroll:true}); }
+scrim.onclick=()=>hideSheet(); $$("[data-close]").forEach(b=>b.onclick=()=>hideSheet());
+document.addEventListener("keydown", e=>{ if(e.key==="Escape") hideSheet(); });
+$$(".sheet").forEach(sh=>{ const g=$(".grab",sh); let y0=null,dy=0; g.addEventListener("pointerdown",e=>{ y0=e.clientY; dy=0; g.setPointerCapture(e.pointerId); sh.style.transition="none"; }); g.addEventListener("pointermove",e=>{ if(y0==null) return; dy=Math.max(0,e.clientY-y0); sh.style.transform=`translateY(${dy}px)`; }); const end=()=>{ if(y0==null) return; sh.style.transition=""; y0=null; if(dy>80) hideSheet(); else sh.style.transform=""; }; g.addEventListener("pointerup",end); g.addEventListener("pointercancel",end); });
+$("#openSettings").onclick=()=>showSheet("settingsSheet");
+$("#openLibrary").onclick=()=>showSheet("librarySheet");
+$("#openMore").onclick=()=>showSheet("moreSheet");
+$("#libBtn2").onclick=()=>showSheet("librarySheet");
+
+/* ---------- matrix rain ---------- */
+const rain=(()=>{ const c=$("#rain"), ctx=c.getContext("2d"); const glyphs="ΚΛΩΘΩΑΤΡΟΠΟΣΛΑΧΕΣΙΣ01アカサタナハマヤラワ∴∵⊹".split(""); let cols=[],fs=16,w=0,hgt=0,raf=0,last=0,mode="on"; const reduce=matchMedia("(prefers-reduced-motion: reduce)");
+  function size(){ const dpr=Math.min(window.devicePixelRatio||1,2); w=innerWidth; hgt=innerHeight; c.width=w*dpr; c.height=hgt*dpr; ctx.setTransform(dpr,0,0,dpr,0,0); fs=w<500?14:16; cols=Array.from({length:Math.ceil(w/fs)},()=>Math.random()*-hgt/fs); ctx.fillStyle="#070102"; ctx.fillRect(0,0,w,hgt); if(reduce.matches||mode==="off") still(); }
+  function frame(t){ raf=requestAnimationFrame(frame); if(t-last<55) return; last=t; ctx.fillStyle="rgba(7,1,2,.12)"; ctx.fillRect(0,0,w,hgt); ctx.font=fs+"px "+getComputedStyle(document.body).fontFamily; cols.forEach((y,i)=>{ const ch=glyphs[(Math.random()*glyphs.length)|0]; ctx.fillStyle=Math.random()<.04?"#ffd0d4":(Math.random()<.5?"#ff2a3d":"#9a0016"); ctx.fillText(ch,i*fs,y*fs); cols[i]=(y*fs>hgt&&Math.random()>.975)?0:y+1; }); }
+  function still(){ ctx.fillStyle="#070102"; ctx.fillRect(0,0,w,hgt); ctx.font=fs+"px monospace"; for(let i=0;i<cols.length;i++){ const len=(Math.random()*12)|0, y0=(Math.random()*hgt/fs)|0; for(let j=0;j<len;j++){ ctx.fillStyle=`rgba(255,42,61,${(j/len)*.5})`; ctx.fillText(glyphs[(Math.random()*glyphs.length)|0],i*fs,(y0+j)*fs);} } }
+  function start(){ cancelAnimationFrame(raf); if(mode==="off"||reduce.matches||document.hidden){ still(); return; } raf=requestAnimationFrame(frame); }
+  function setMode(m){ mode=m; document.body.classList.toggle("rain-dim",m==="dim"); document.body.classList.toggle("rain-off",m==="off"); $$("#rainSeg button").forEach(b=>b.setAttribute("aria-pressed",b.dataset.rain===m?"true":"false")); start(); }
+  addEventListener("resize",()=>{ size(); start(); }); document.addEventListener("visibilitychange",start); reduce.addEventListener&&reduce.addEventListener("change",start);
+  size(); return {setMode}; })();
+const prefs=store.get(PREFS,{rain:"on"}); rain.setMode(prefs.rain||"on");
+$$("#rainSeg button").forEach(b=>b.onclick=()=>{ prefs.rain=b.dataset.rain; store.set(PREFS,prefs); rain.setMode(prefs.rain); });
+/* ---------- app icon picker ---------- */
+const ICON_KEY="moirai-icon", ICONS=[["neon-cauldron","Neon Cauldron"],["thread-weavers","Thread Weavers"],["arcane","Arcane"],["classic","Classic"]];
+function applyIcon(v){ if(!ICONS.some(([id])=>id===v)) v=ICONS[0][0]; const b=`icons/${v}/`;
+  $("#touchIcon").href=b+"apple-touch-icon.png"; $("#favSvg").href=b+"icon.svg"; $("#favPng").href=b+"favicon-32.png"; $("#logo").src=b+"icon-192.png";
+  $$("#iconPick button").forEach(x=>{ const on=x.dataset.icon===v; x.setAttribute("aria-checked",on?"true":"false"); x.tabIndex=on?0:-1; }); return v; }
+ICONS.forEach(([id,name])=>$("#iconPick").append(h("button",{type:"button",role:"radio","data-icon":id,"aria-label":name+" icon",onclick:()=>{ store.set(ICON_KEY,applyIcon(id)); toast(name+" icon set"); }},h("img",{src:`icons/${id}/icon-192.png`,alt:"",width:"56",height:"56",loading:"lazy"}),name)));
+applyIcon(store.get(ICON_KEY,window.__moiraiIcon||ICONS[0][0]));
+$("#iconPick").addEventListener("keydown",e=>{ const d={ArrowRight:1,ArrowDown:1,ArrowLeft:-1,ArrowUp:-1}[e.key]; if(!d) return; e.preventDefault(); const bs=$$("#iconPick button"), i=(bs.indexOf(document.activeElement)+d+bs.length)%bs.length; bs[i].focus(); bs[i].click(); });
+
+/* ---------- voice ---------- */
+function speak(text){ if(!("speechSynthesis" in window)){ toast("This browser cannot speak."); return; } speechSynthesis.cancel(); const t=String(text||"").trim(); if(!t){ toast("Nothing to speak yet."); return; } const u=new SpeechSynthesisUtterance(t.slice(0,4000)); u.rate=1.02; speechSynthesis.speak(u); }
+$("#speak").onclick=()=>{ hideSheet(); speak(threadText() || FATES.map(f=>$("#"+f.id).value&&`${f.name} says: ${$("#"+f.id).value}`).filter(Boolean).join("\n\n")); };
+$("#stopVoice").onclick=()=>{ if(window.speechSynthesis) speechSynthesis.cancel(); stopListening(); toast("Voice stopped"); };
+$$("[data-speak]").forEach(b=>b.onclick=()=>speak($("#"+b.dataset.speak).value));
+let hear=null; const listenBtn=$("#listen");
+function stopListening(){ if(hear){ try{hear.stop();}catch{} } listenBtn.classList.remove("on"); listenBtn.setAttribute("aria-pressed","false"); }
+listenBtn.onclick=()=>{ const Rec=window.SpeechRecognition||window.webkitSpeechRecognition; if(!Rec){ toast("This browser cannot listen. Open in Safari."); return; } if(listenBtn.classList.contains("on")){ stopListening(); return; } const base=$("#q").value.trim(); hear=new Rec(); hear.lang=navigator.language||"en-US"; hear.interimResults=true; hear.continuous=false; hear.onresult=e=>{ const said=[...e.results].map(r=>r[0].transcript).join(" "); $("#q").value=(base?base+" ":"")+said; updateCounts(); }; hear.onend=()=>{ listenBtn.classList.remove("on"); listenBtn.setAttribute("aria-pressed","false"); }; hear.onerror=e=>{ stopListening(); toast(e.error==="not-allowed"?"Allow the microphone.":"Mic error: "+e.error); }; listenBtn.classList.add("on"); listenBtn.setAttribute("aria-pressed","true"); try{ hear.start(); toast("Listening…"); }catch(err){ stopListening(); toast("Mic unavailable."); } };
+
+/* ---------- API calls ---------- */
+async function post(url, headers, body){ const res=await fetch(url,{method:"POST",headers,body:JSON.stringify(body)}); let data={}; try{ data=await res.json(); }catch{} if(!res.ok) throw new Error((data.error&&(data.error.message||data.error))||res.status+" "+res.statusText); return data; }
+function callModel(id, prompt){ const f=byId[id], key=keyOf(f), model=modelOf(f);
+  if(!key) return Promise.reject(new Error(`No ${f.name} key — add it in Settings, or paste a reply.`));
+  const msgs=[{role:"user",content:prompt}];
+  if(id==="gpt") return post("https://api.openai.com/v1/chat/completions",{"Authorization":"Bearer "+key,"Content-Type":"application/json"},{model,messages:msgs}).then(d=>d.choices[0].message.content||"");
+  if(id==="claude") return post("https://api.anthropic.com/v1/messages",{"x-api-key":key,"anthropic-version":"2023-06-01","anthropic-dangerous-direct-browser-access":"true","content-type":"application/json"},{model,max_tokens:1600,messages:msgs}).then(d=>(d.content||[]).map(c=>c.text||"").join("\n"));
+  return post("https://api.x.ai/v1/chat/completions",{"Authorization":"Bearer "+key,"Content-Type":"application/json"},{model,messages:msgs}).then(d=>d.choices[0].message.content||"");
+}
+const errText=err=>/failed to fetch|load failed|networkerror|cors/i.test(String(err&&err.message||err))?"Browser blocked the call (network/CORS). Paste the reply instead.":String(err&&err.message||err);
+function setBusy(id,on){ const p=$("#panel-"+id), d=$("#"+id+"Dot"); p.classList.toggle("busy",on); on?state.busy.add(id):state.busy.delete(id); d.className="dot"+(on?" busy":""); $$(`[data-ask="${id}"]`).forEach(b=>b.disabled=on); $("#ask").disabled=state.busy.size>0; }
+async function askIds(ids){ const question=$("#q").value.trim(); if(!question){ toast("Ask a question first."); $("#q").focus(); return; }
+  if(ids.length>1 || !state.session || state.session.q!==question){ state.arrived=[]; state.session={id:Date.now(),q:question}; state.crit={}; clearBest(); FATES.forEach(f=>{ $("#"+f.id+"CritWrap").hidden=true; }); }
+  if(ids.length===1) goTo(FATES.findIndex(f=>f.id===ids[0]));
+  await Promise.all(ids.map(async id=>{ const box=$("#"+id), err=$("#"+id+"Err"); err.textContent=""; setBusy(id,true);
+    try{ const text=await callModel(id,question); box.value=text.trim(); if(!state.arrived.includes(id)) state.arrived.push(id); }
+    catch(e){ err.textContent=errText(e); setBusy(id,false); $("#"+id+"Dot").className="dot err"; return; }
+    setBusy(id,false); updateCounts(); }));
+  updateCounts(); if(ids.length>1 && filled().length>=2) weave(); saveToLibrary(true);
+}
+$("#ask").onclick=()=>askIds(FATES.map(f=>f.id));
+$$("[data-ask]").forEach(b=>b.onclick=()=>askIds([b.dataset.ask]));
+const filled=()=>FATES.filter(f=>$("#"+f.id).value.trim());
+
+/* ---------- weave: local sentence-overlap synthesis ---------- */
+const STOP=new Set("a an and are as at be been but by can could do does for from had has have he her his how i if in into is it its just may might more most much must my no not of on one or our out over should so some such than that the their them then there these they this those to too up us very was we were what when where which while who why will with would you your also about only other any each like many make made use used get gets".split(" "));
+const stem=w=>w.replace(/(ings?|edly|ed|es|s|ly)$/,"").slice(0,12);
+function splitSentences(t){ return String(t).split(/\n+/).map(l=>l.replace(/^\s*([-*•>#]+|\d+[.)])\s*/,"").replace(/[*_`#]+/g,"").trim()).filter(Boolean).flatMap(l=>l.split(/(?<=[.!?])\s+(?=[A-Z0-9"“(])/)).map(s=>s.trim()).filter(s=>words(s)>=4); }
+const toks=s=>new Set((s.toLowerCase().match(/[a-z0-9']+/g)||[]).filter(w=>w.length>2&&!STOP.has(w)).map(stem));
+function sim(a,b){ if(!a.size||!b.size) return 0; let n=0; for(const x of a) if(b.has(x)) n++; return n<2?0:(2*n)/(a.size+b.size); }
+let lastWeave=null;
+function weave(){ const packs=filled().map(f=>({f,sents:splitSentences($("#"+f.id).value).map(s=>({s,t:toks(s),used:false}))})); const out=$("#synthesis"); out.replaceChildren();
+  if(packs.length<2){ lastWeave=null; out.append(h("p",{class:"empty"},"Need at least two replies to weave. Ask, or paste replies into the panels.")); return; }
+  const TH=0.3, agree=[];
+  packs.forEach((P,pi)=>P.sents.forEach(S=>{ if(S.used) return; const by=[P.f]; let score=0;
+    packs.forEach((Q,qi)=>{ if(qi===pi) return; let best=null,bs=0; Q.sents.forEach(T=>{ const v=sim(S.t,T.t); if(v>bs){bs=v;best=T;} }); if(best&&bs>=TH){ by.push(Q.f); best.used=true; score+=bs; } });
+    if(by.length>1){ S.used=true; agree.push({text:S.s,by,score}); } }));
+  agree.sort((a,b)=>b.by.length-a.by.length||b.score-a.score);
+  const solo=packs.map(P=>({f:P.f,list:P.sents.filter(S=>!S.used).map(S=>S.s).slice(0,4)})).filter(x=>x.list.length);
+  lastWeave={agree:agree.slice(0,8),solo};
+  out.append(h("h3",{},"Where they agree"));
+  out.append(agree.length? h("ul",{}, agree.slice(0,8).map((a,i)=>h("li",{style:`animation-delay:${i*40}ms`}, a.text, h("div",{}, a.by.map(f=>h("span",{class:"pill"},f.name)))))) : h("p",{class:"empty"},"No clear overlap — treat every point below as a lead to check."));
+  out.append(h("h3",{},"Only one of them said"));
+  out.append(solo.length? h("ul",{}, solo.flatMap(x=>x.list.map(s=>h("li",{class:"solo"}, s, h("div",{},h("span",{class:"pill"},"only "+x.f.name)))))) : h("p",{class:"empty"},"Nothing unique — they covered the same ground."));
+  saveToLibrary(true);
+}
+$("#combine").onclick=()=>{ weave(); if(lastWeave) $("#synthesis").scrollIntoView({behavior:matchMedia("(prefers-reduced-motion: reduce)").matches?"auto":"smooth",block:"start"}); };
+function threadText(){ if(!lastWeave) return ""; let t=""; if(lastWeave.agree.length) t+="Where they agree. "+lastWeave.agree.map(a=>a.text).join(" ")+"\n\n"; if(lastWeave.solo.length) t+="Only one of them said. "+lastWeave.solo.map(x=>x.f.name+": "+x.list.join(" ")).join("\n"); return t.trim(); }
+
+/* ---------- check each other ---------- */
+$("#checkBtn").onclick=async()=>{ hideSheet(); const have=filled(); if(have.length<2){ toast("Need at least two replies to cross-check."); return; } const q=$("#q").value.trim()||"(question not given)"; const runners=have.filter(f=>keyOf(f)); if(!runners.length){ toast("Add at least one API key in Settings."); return; } toast("The Fates are checking each other…");
+  await Promise.all(runners.map(async f=>{ const others=have.filter(o=>o.id!==f.id); const prompt=`Question: ${q}\n\nTwo other AI models answered. Critique their answers briefly: point out errors, missing points, or overstatements, then say what you agree with. Be concrete and short.\n\n`+others.map(o=>`--- ${o.name} ---\n${$("#"+o.id).value.trim()}`).join("\n\n");
+    const wrap=$("#"+f.id+"CritWrap"), body=$("#"+f.id+"Crit"); wrap.hidden=false; wrap.open=true; body.textContent="Checking…"; setBusy(f.id,true);
+    try{ const t=(await callModel(f.id,prompt)).trim(); body.textContent=t; state.crit[f.id]=t; }catch(e){ body.textContent=errText(e); }
+    setBusy(f.id,false); updateCounts(); }));
+  saveToLibrary(true);
+};
+
+/* ---------- scoring ---------- */
+function sig(){ return FATES.map(f=>$("#"+f.id).value.trim().length+":"+$("#"+f.id).value.trim().slice(0,40)).join("|"); }
+function renderScores(){ const s=store.get(SCORES,{gpt:0,claude:0,grok:0}); const max=Math.max(...FATES.map(f=>s[f.id]||0)); const g=$("#scores"); g.replaceChildren(...FATES.map(f=>h("div",{class:"score"+(max>0&&s[f.id]===max?" lead":"")}, h("b",{},s[f.id]||0), h("small",{},f.name)))); FATES.forEach(f=>$("#"+f.id+"TabScore").textContent="★"+(s[f.id]||0)); }
+function addScore(id,n){ const s=store.get(SCORES,{gpt:0,claude:0,grok:0}); s[id]=(s[id]||0)+n; store.set(SCORES,s); renderScores(); }
+function scoreRound(){ hideSheet(); const have=filled(); if(!have.length){ toast("No replies to score."); return; } const sg=sig(); if(state.scoredSig===sg){ toast("Already scored these replies."); return; } const notes=[];
+  const first=state.arrived.find(id=>$("#"+id).value.trim()); if(first){ addScore(first,1); notes.push(byId[first].name+" first +1"); }
+  const wc=have.map(f=>[f.id,words($("#"+f.id).value)]); const m=Math.max(...wc.map(x=>x[1])); wc.filter(x=>x[1]===m).forEach(([id])=>{ addScore(id,3); notes.push(byId[id].name+" most words +3"); });
+  state.scoredSig=sg; toast(notes.join(" · ")); }
+$("#scoreBtn").onclick=scoreRound; $("#scoreBtn2").onclick=scoreRound;
+function clearBest(){ state.best=null; $$(".panel").forEach(p=>p.classList.remove("best")); $$("[data-best]").forEach(b=>b.setAttribute("aria-pressed","false")); }
+$$("[data-best]").forEach(b=>b.onclick=()=>{ const id=b.dataset.best; if(!$("#"+id).value.trim()){ toast("Nothing to pick yet."); return; } if(state.best===id){ addScore(id,-2); clearBest(); toast("Best pick removed"); return; } if(state.best) addScore(state.best,-2); clearBest(); state.best=id; $("#panel-"+id).classList.add("best"); b.setAttribute("aria-pressed","true"); addScore(id,2); toast(byId[id].name+" is your best +2"); });
+renderScores();
+
+/* ---------- export ---------- */
+function buildMarkdown(){ const q=$("#q").value.trim(); const lines=[`# Moirai — ${q||"Untitled question"}`,"",`_${new Date().toLocaleString()}_`,""];
+  FATES.forEach(f=>{ const v=$("#"+f.id).value.trim(); if(!v) return; lines.push(`## ${f.fate} · ${f.name} (${modelOf(f)})${state.best===f.id?" ★ best":""}`,"",v,""); });
+  if(lastWeave){ lines.push("## The thread","","### Where they agree",""); lastWeave.agree.length?lastWeave.agree.forEach(a=>lines.push(`- ${a.text} _(${a.by.map(f=>f.name).join(", ")})_`)):lines.push("- No clear overlap."); lines.push("","### Only one of them said",""); lastWeave.solo.forEach(x=>x.list.forEach(s=>lines.push(`- **${x.f.name}:** ${s}`))); lines.push(""); }
+  const crits=FATES.filter(f=>state.crit[f.id]); if(crits.length){ lines.push("## Check each other",""); crits.forEach(f=>lines.push(`### ${f.name} on the others`,"",state.crit[f.id],"")); }
+  return lines.join("\n"); }
+const slug=s=>(s||"thread").toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/^-|-$/g,"").slice(0,40)||"thread";
+$("#copyBtn").onclick=async()=>{ hideSheet(); const md=buildMarkdown(); try{ await navigator.clipboard.writeText(md); toast("Thread copied"); }catch{ const t=h("textarea",{style:"position:fixed;opacity:0"}); t.value=md; document.body.append(t); t.select(); try{document.execCommand("copy"); toast("Thread copied");}catch{ toast("Copy failed"); } t.remove(); } };
+// Download merges the old "Save for Drive": on iOS the share sheet offers Save to Files / Google Drive.
+$("#downloadBtn").onclick=async()=>{ hideSheet(); const md=buildMarkdown(); const name=`moirai-${slug($("#q").value)}-${new Date().toISOString().slice(0,10)}.md`; const file=new File([md],name,{type:"text/markdown"});
+  if(navigator.canShare && navigator.share && /iphone|ipad|ipod|android/i.test(navigator.userAgent) && navigator.canShare({files:[file]})){ try{ await navigator.share({files:[file],title:"Moirai thread"}); return; }catch(e){ if(e.name==="AbortError") return; } }
+  const url=URL.createObjectURL(file); const a=h("a",{href:url,download:name}); document.body.append(a); a.click(); a.remove(); setTimeout(()=>URL.revokeObjectURL(url),4000); toast("Downloaded "+name); };
+$("#emailBtn").onclick=()=>{ hideSheet(); const md=buildMarkdown(); const subject="Moirai: "+($("#q").value.trim()||"thread").slice(0,80); let body=md; if(body.length>1800) body=body.slice(0,1800)+"\n\n…(trimmed — use Download for the full thread)"; location.href=`mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`; };
+
+/* ---------- library (fix: explicit element, never window.history) ---------- */
+const libraryList=$("#libraryList");
+function saveToLibrary(silent){ const q=$("#q").value.trim(); if(!q||!filled().length) return; const lib=store.get(LIB,[]); const sid=state.session&&state.session.q===q?state.session.id:(state.session={id:Date.now(),q}).id;
+  const entry={id:sid,t:Date.now(),q,replies:Object.fromEntries(FATES.map(f=>[f.id,$("#"+f.id).value])),crit:state.crit,best:state.best};
+  const i=lib.findIndex(e=>e.id===sid); if(i>=0) lib.splice(i,1); lib.unshift(entry); store.set(LIB,lib.slice(0,50)); if(!silent) toast("Kept in library"); if(openSheet&&openSheet.id==="librarySheet") renderLibrary(); }
+$("#saveBtn").onclick=()=>{ hideSheet(); if(!$("#q").value.trim()||!filled().length){ toast("Need a question and a reply to keep."); return; } saveToLibrary(false); };
+function renderLibrary(){ const term=$("#libSearch").value.trim().toLowerCase(); const lib=store.get(LIB,[]); const rows=lib.filter(e=>!term||(e.q+" "+Object.values(e.replies||{}).join(" ")).toLowerCase().includes(term));
+  libraryList.replaceChildren(...(rows.length?rows.map(e=>h("li",{class:"lib-item"},
+    h("button",{class:"lib-open",onclick:()=>loadEntry(e)}, h("b",{},e.q), h("small",{}, new Date(e.t).toLocaleString()+" · "+FATES.filter(f=>(e.replies||{})[f.id]).map(f=>f.name).join(", "))),
+    h("button",{class:"lib-del","aria-label":"Delete "+e.q,onclick:()=>{ store.set(LIB,store.get(LIB,[]).filter(x=>x.id!==e.id)); renderLibrary(); }},"×"))):[h("li",{class:"empty"}, lib.length?"No matches.":"Nothing kept yet. Questions you ask are saved here (last 50).")])); }
+$("#libSearch").addEventListener("input",renderLibrary);
+function loadEntry(e){ $("#q").value=e.q; FATES.forEach(f=>{ $("#"+f.id).value=(e.replies||{})[f.id]||""; $("#"+f.id+"Err").textContent=""; const c=(e.crit||{})[f.id]; $("#"+f.id+"CritWrap").hidden=!c; $("#"+f.id+"Crit").textContent=c||""; }); state.session={id:e.id,q:e.q}; state.crit=e.crit||{}; state.arrived=[]; clearBest(); if(e.best){ state.best=e.best; $("#panel-"+e.best).classList.add("best"); } updateCounts(); weave(); hideSheet(); window.scrollTo({top:0}); toast("Thread restored"); }
+$("#clearLib").onclick=()=>{ if(confirm("Clear the whole library?")){ store.set(LIB,[]); renderLibrary(); toast("Library cleared"); } };
+$("#resetScores").onclick=()=>{ if(confirm("Reset all scores to zero?")){ store.set(SCORES,{gpt:0,claude:0,grok:0}); state.scoredSig=null; renderScores(); toast("Scores reset"); } };
+$("#newBtn").onclick=()=>{ hideSheet(); $("#q").value=""; FATES.forEach(f=>{ $("#"+f.id).value=""; $("#"+f.id+"Err").textContent=""; $("#"+f.id+"CritWrap").hidden=true; }); state.session=null; state.crit={}; state.arrived=[]; clearBest(); lastWeave=null; $("#synthesis").replaceChildren(h("p",{class:"empty"},"Ask one, or all three, then weave.")); updateCounts(); goTo(0); $("#q").focus(); };
+
+updateCounts();
+
+/* ---------- service worker (needs same-origin https, e.g. GitHub Pages) ---------- */
+if("serviceWorker" in navigator && (location.protocol==="https:"||location.hostname==="localhost"||location.hostname==="127.0.0.1")){
+  addEventListener("load",()=>navigator.serviceWorker.register("sw.js",{scope:"./"}).then(r=>{ window.__swReg=r; }).catch(e=>console.warn("SW registration failed",e)));
+}
 </script>
 </body>
 </html>
